@@ -22,10 +22,33 @@ namespace TweetClip
             _contents = new Dictionary<string, int>();
             _rawTweets = null;
             _whiteList = null;
+            
         }
+        public delegate string[] MakeBlackList(string[] whiteList);
 
-        public void ClipMode (string[] dataFiles, string[] configFiles)
+        public void ClipMode (string[] dataFiles, string[] configFiles, clipMode mode)
         {
+            MakeBlackList blackListPtr = null;
+            //select the search mode
+            switch (mode)
+            {
+                case clipMode.LOOSE:
+                    {
+                        blackListPtr = MakeBlackList_Loose;
+                    }
+                    break;
+                case clipMode.STRICT:
+                    {
+                        blackListPtr = MakeBlackList_Strict;
+                    }
+                    break;
+                case clipMode.EXPLICIT:
+                    {
+                        blackListPtr = MakeBlackList_Explicit;
+                    }
+                    break;
+            }
+               
             _rawTweets = new RawData(dataFiles[0]);
             
             //---------------------    map all contents, truncate, pseudonomise, and serialise and send to file    -------------------------
@@ -35,10 +58,11 @@ namespace TweetClip
 
             List<string> clipTwStr = new List<string>();
             int count = 0;
-            foreach (string tw in _rawTweets.Data)
+            //foreach (string tw in _rawTweets.Data)
+            for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
                 Console.WriteLine("Discovering tweet \"" + ++count + "\"");
-                _tweetObjects.Add(JObject.Parse(tw));
+                _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
                 _tweets.Add(new Tweet(_tweetObjects.Last()));
                 _tweets.Last().Index(ref _contents);
             }
@@ -46,9 +70,7 @@ namespace TweetClip
             foreach (JObject tweet in _tweetObjects)
             {
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
-                //string[] blackList = MakeBlackList_Explicit(_whiteList);
-                string[] blackList = MakeBlackList_Strict(_whiteList);
-                //string[] blackList = MakeBlackList_Loose(_whiteList);
+                string[] blackList = blackListPtr(_whiteList);
                 _clippedTweets.Add(ClipTweet(tweet, blackList));
                 clipTwStr.Add(_clippedTweets.Last().ToString());
             }
@@ -57,7 +79,8 @@ namespace TweetClip
         }
 
         //make a composite list from the whitelist that we'll use to prune the copied tweet
-        //TODO: MORE CAPABLE HANLDLING OF ARRAYS
+        
+        //partial match ignoring indices
         private string[] MakeBlackList_Loose(string[] whiteList)
         {
             List<string> listr = _contents.Keys.ToList();
@@ -70,7 +93,7 @@ namespace TweetClip
                 {
                     if (targetSignature[i].Last() == ']')
                     {
-                        targetSignature[i] = targetSignature[i].Remove(0, targetSignature[i].Length - 3);
+                        targetSignature[i] = targetSignature[i].Remove(targetSignature[i].IndexOf('['));
                     }
                 } 
                 //find all elements
@@ -99,6 +122,7 @@ namespace TweetClip
             return _contents.Keys.Reverse().ToArray();
         }
 
+        //inclusive (greater than) match ignoring indices
         private string[] MakeBlackList_Strict(string[] whiteList)
         {
             List<string> listr = _contents.Keys.ToList();
@@ -111,7 +135,7 @@ namespace TweetClip
                 {
                     if (targetSignature[i].Last() == ']')
                     {
-                        targetSignature[i] = targetSignature[i].Remove(targetSignature[i].Length - 3);
+                        targetSignature[i] = targetSignature[i].Remove(targetSignature[i].IndexOf('['));
                     }
                 }
                 //find all elements
@@ -124,7 +148,7 @@ namespace TweetClip
                         {
                             if (listVarSegments[i].Last() == ']')
                             {
-                                listVarSegments[i] = listVarSegments[i].Remove(listVarSegments[i].Length - 3);
+                                listVarSegments[i] = listVarSegments[i].Remove(listVarSegments[i].IndexOf('['));
                             }
                         }
 
@@ -163,16 +187,56 @@ namespace TweetClip
             return _contents.Keys.Reverse().ToArray();
         }
 
+        //exact match ignoring indices
         private string[] MakeBlackList_Explicit(string[] whiteList)
         {
-            List<string> listr = _contents.Keys.ToList();
-            foreach (string wlEntry in whiteList)
+            List<string> contentArray = _contents.Keys.ToList();
+            for(int i = 0; i < whiteList.Length; ++i)
             {
-                if (_contents.Keys.Contains<string>(wlEntry))
+                //clean the whiteList item of array indices
+                string[] whiteListSegments = whiteList[i].Split('.');
+                //get rid of array indices
+                string wlp = "";
+                for (int j = 0; j < whiteListSegments.Length; ++j)
                 {
-                    _contents.Remove(wlEntry);
+                    if (whiteListSegments[j].Last() == ']')
+                    {
+                        whiteListSegments[j] = whiteListSegments[j].Remove(whiteListSegments[j].IndexOf('['));
+                    }
+                    wlp += whiteListSegments[j] + ".";
                 }
+                wlp = wlp.Remove(wlp.Length - 1);
 
+
+                //get all matches to pattern
+                string[] contentTargets = contentArray.FindAll(delegate (
+                    string contentItem)
+                {
+                    string[] contentItemSegments = contentItem.Split('.');
+                    string clp = "";
+                    for (int j = 0; j < contentItemSegments.Length; ++j)
+                    {
+                        if (contentItemSegments[j].Last() == ']')
+                        {
+                            contentItemSegments[j] = contentItemSegments[j].Remove(contentItemSegments[j].IndexOf('['));
+                        }
+                        clp += contentItemSegments[j] + ".";
+                    }
+                    clp = clp.Remove(clp.Length - 1);
+
+                    if (clp == wlp)
+                    {
+                        return true;
+                    }
+                    return false;
+                }).ToArray();
+
+
+                //if (_contents.Keys.Contains<string>(whiteList[i]))
+                for (int k = 0; k < contentTargets.Length; ++k)
+                {
+                    _contents.Remove(contentTargets[k]);
+                }
             }
             //retrieve the list in reverse order to preserve array indices
             return _contents.Keys.Reverse().ToArray();
@@ -182,10 +246,11 @@ namespace TweetClip
         private JObject ClipTweet(JObject src, string[] blackList)
         {
             JObject jo = new JObject(src);
-            foreach (string path in blackList)
+            //foreach (string path in blackList)
+            for(int i = 0; i < blackList.Length; ++i)
             {
                 //start walking through the blacklist
-                ClipAndWalk(jo.SelectToken(path));
+                ClipAndWalk(jo.SelectToken(blackList[i]));
             }
             return jo;
         }
@@ -218,7 +283,6 @@ namespace TweetClip
             //if the parent is a property we need to walk up the tree
             if (parent.Type == JTokenType.Property)
             {
-                //
                 ClipAndWalk(parent);
             }
             else
