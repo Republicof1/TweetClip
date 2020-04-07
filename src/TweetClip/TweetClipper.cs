@@ -42,28 +42,137 @@ namespace TweetClip
                 _tweets.Add(new Tweet(_tweetObjects.Last()));
                 _tweets.Last().Index(ref _contents);
             }
+            count = 0;
             foreach (JObject tweet in _tweetObjects)
             {
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
-                string[] blackList = MakeBlackList(_whiteList);
+                //string[] blackList = MakeBlackList_Explicit(_whiteList);
+                string[] blackList = MakeBlackList_Strict(_whiteList);
+                //string[] blackList = MakeBlackList_Loose(_whiteList);
                 _clippedTweets.Add(ClipTweet(tweet, blackList));
                 clipTwStr.Add(_clippedTweets.Last().ToString());
             }
 
             File.WriteAllLines("Data\\out.json", clipTwStr);
-
         }
 
         //make a composite list from the whitelist that we'll use to prune the copied tweet
         //TODO: MORE CAPABLE HANLDLING OF ARRAYS
-        private string[] MakeBlackList(string[] whiteList)
+        private string[] MakeBlackList_Loose(string[] whiteList)
         {
+            List<string> listr = _contents.Keys.ToList();
+
+            for (int x = 0; x < whiteList.Length; ++x)
+            {
+                string[] targetSignature = whiteList[x].Split('.');
+                //get rid of array indices
+                for (int i = 0; i < targetSignature.Length; ++i)
+                {
+                    if (targetSignature[i].Last() == ']')
+                    {
+                        targetSignature[i] = targetSignature[i].Remove(0, targetSignature[i].Length - 3);
+                    }
+                } 
+                //find all elements
+                string[] foundFields = listr.FindAll(
+                    delegate (string listValue)
+                    {                          
+                        for (int i = 0; i < targetSignature.Length; ++i)
+                        {
+                            if(!listValue.Contains(targetSignature[i]))
+                            {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                ).ToArray();
+
+                for(int k = 0; k < foundFields.Length; ++k)
+                {
+                    _contents.Remove(foundFields[k]);
+                }
+
+                int f = 0;
+            }
+            //retrieve the list in reverse order to preserve array indices
+            return _contents.Keys.Reverse().ToArray();
+        }
+
+        private string[] MakeBlackList_Strict(string[] whiteList)
+        {
+            List<string> listr = _contents.Keys.ToList();
+
+            for (int x = 0; x < whiteList.Length; ++x)
+            {
+                string[] targetSignature = whiteList[x].Split('.');
+                //get rid of array indices
+                for (int i = 0; i < targetSignature.Length; ++i)
+                {
+                    if (targetSignature[i].Last() == ']')
+                    {
+                        targetSignature[i] = targetSignature[i].Remove(targetSignature[i].Length - 3);
+                    }
+                }
+                //find all elements
+                string[] foundFields = listr.FindAll(
+                    delegate (string listValue)
+                    {
+                        string[] listVarSegments = listValue.Split('.');
+                        //get rid of array indices
+                        for (int i = 0; i < listVarSegments.Length; ++i)
+                        {
+                            if (listVarSegments[i].Last() == ']')
+                            {
+                                listVarSegments[i] = listVarSegments[i].Remove(listVarSegments[i].Length - 3);
+                            }
+                        }
+
+                        int match = 0;
+                        for (int i = 0; i < targetSignature.Length; ++i)
+                        {
+                            for (int j = 0; j < listVarSegments.Length; ++j)
+                            {
+                                if (targetSignature[i] == listVarSegments[j])
+                                {
+                                    ++match;
+                                }
+                            }
+                        }
+
+                        //match strength
+                        if (match >= targetSignature.Length)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                ).ToArray();
+
+                for (int k = 0; k < foundFields.Length; ++k)
+                {
+                    _contents.Remove(foundFields[k]);
+                }
+
+                int f = 0;
+            }
+            //retrieve the list in reverse order to preserve array indices
+            return _contents.Keys.Reverse().ToArray();
+        }
+
+        private string[] MakeBlackList_Explicit(string[] whiteList)
+        {
+            List<string> listr = _contents.Keys.ToList();
             foreach (string wlEntry in whiteList)
             {
                 if (_contents.Keys.Contains<string>(wlEntry))
                 {
                     _contents.Remove(wlEntry);
                 }
+
             }
             //retrieve the list in reverse order to preserve array indices
             return _contents.Keys.Reverse().ToArray();
@@ -100,6 +209,10 @@ namespace TweetClip
             if (target != null)
             {
                 parent = target.Parent;
+                if(parent == null)
+                {
+                    return false;
+                }
             }
 
             //if the parent is a property we need to walk up the tree
