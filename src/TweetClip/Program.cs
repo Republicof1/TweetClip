@@ -27,11 +27,12 @@ namespace TweetClip
             [Option('e', "dataDictionaryFilePath", Required = false, HelpText = "explicit match mode")]
             public bool ExplicitMode { get; set; }
         }
-        public enum clipMode
+        public enum modeFlags
         {
             LOOSE = 0,
             STRICT,
-            EXPLICIT
+            EXPLICIT,
+            INDEX
         }
 
         static void Main(string[] args)
@@ -43,7 +44,7 @@ namespace TweetClip
             TweetClipper tc = new TweetClipper();
 
             //get the target file from arguments (Options)
-            clipMode cMode = clipMode.LOOSE;
+            modeFlags cMode = modeFlags.LOOSE;
 
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts =>
@@ -57,24 +58,24 @@ namespace TweetClip
                     }
                     if(opts.StrictMode)
                     {
-                        cMode = clipMode.STRICT;
+                        cMode = modeFlags.STRICT;
                     }
                     //if both -s & -e go explicit
                     if(opts.ExplicitMode)
                     {
-                        cMode = clipMode.EXPLICIT;
+                        cMode = modeFlags.EXPLICIT;
                     }
                 });
 
-            if (configFiles != null && configFiles == null)
+            if (dataFiles != null && configFiles == null)
             {
                 
                 Console.WriteLine("config not included; index mode started\nPrcessing \"" + dataFiles[0] + "\"");
-                if (cMode != clipMode.LOOSE)
+                if (cMode != modeFlags.LOOSE)
                 {
-                    Console.WriteLine("note: clip mode ignored in this mode");
+                    Console.WriteLine("note: clip modes ignored in this mode");
                 }
-                tc.IndexMode(dataFiles);
+                tc.IndexMode(dataFiles, modeFlags.INDEX);
             }
             else if (dataFiles.Length > 0 && configFiles.Length > 0)
             {

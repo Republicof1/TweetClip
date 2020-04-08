@@ -20,29 +20,30 @@ namespace TweetClip
             _clippedTweets = new List<JObject>();
             _tweetObjects = new List<JObject>();
             _contents = new Dictionary<string, int>();
+            _types = new Dictionary<string, string>();
             _rawTweets = null;
             _whiteList = null;
             
         }
         public delegate string[] MakeBlackList(string[] whiteList);
 
-        public void ClipMode (string[] dataFiles, string[] configFiles, clipMode mode)
+        public void ClipMode (string[] dataFiles, string[] configFiles, modeFlags mode)
         {
             MakeBlackList blackListPtr = null;
             //select the search mode
             switch (mode)
             {
-                case clipMode.LOOSE:
+                case modeFlags.LOOSE:
                     {
                         blackListPtr = MakeBlackList_Loose;
                     }
                     break;
-                case clipMode.STRICT:
+                case modeFlags.STRICT:
                     {
                         blackListPtr = MakeBlackList_Strict;
                     }
                     break;
-                case clipMode.EXPLICIT:
+                case modeFlags.EXPLICIT:
                     {
                         blackListPtr = MakeBlackList_Explicit;
                     }
@@ -58,13 +59,12 @@ namespace TweetClip
 
             List<string> clipTwStr = new List<string>();
             int count = 0;
-            //foreach (string tw in _rawTweets.Data)
             for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
                 Console.WriteLine("Discovering tweet \"" + ++count + "\"");
                 _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
-                _tweets.Add(new Tweet(_tweetObjects.Last()));
-                _tweets.Last().Index(ref _contents);
+                _tweets.Add(new Tweet(_tweetObjects.Last(), mode));
+                _tweets.Last().Index(ref _contents, ref _types);
             }
             count = 0;
             foreach (JObject tweet in _tweetObjects)
@@ -180,8 +180,6 @@ namespace TweetClip
                 {
                     _contents.Remove(foundFields[k]);
                 }
-
-                int f = 0;
             }
             //retrieve the list in reverse order to preserve array indices
             return _contents.Keys.Reverse().ToArray();
@@ -287,7 +285,16 @@ namespace TweetClip
             }
             else
             {
-                target.Remove();
+                if (target.Type != JTokenType.Array)
+                {
+                    target.Remove();
+                }
+                //only remove arrays where they are empty
+                //avoids mistaken clearance of leaves
+                else if(target.Children().Count() == 0)
+                {
+                    target.Remove();
+                }
             }
 
             //walk back the tree if the parent of the target is empty
@@ -304,7 +311,7 @@ namespace TweetClip
             return false;
         }
 
-        public void IndexMode (string[] dataFiles)
+        public void IndexMode (string[] dataFiles, modeFlags mode)
         {           
             _rawTweets = new RawData(dataFiles[0]);
 
@@ -316,30 +323,60 @@ namespace TweetClip
             {
                 Console.WriteLine("Exploring tweet \"" + ++count + "\"");
                 JObject tweetObject = JObject.Parse(tw);
-                _tweets.Add(new Tweet(tweetObject));
-                _tweets.Last<Tweet>().Index(ref _contents);
+                _tweets.Add(new Tweet(tweetObject, mode));
+                _tweets.Last<Tweet>().Index(ref _contents, ref _types);
             }
 
-            List<string> orderedIndexList = _contents.Keys.ToList();
-            orderedIndexList.Sort();
+            //this creates a list of element ignoreing array contents
+            List<string> orderedPathList = new List<string>();
 
-            File.WriteAllLines("Data\\index.txt", orderedIndexList);
-
-            List<string> contentList = new List<string>();
-            contentList.Add("Node,Value");
+            //alphabetically order these paths
+            List<string> pathList = _contents.Keys.ToList();
+            pathList.Sort();
+            //optimisation
+            string[] pathArray = pathList.ToArray();
             
-            foreach (string index in orderedIndexList)
+            for(int i = 0; i < pathArray.Length; ++i)
             {
+                //clean the paths of array indices
+                string[] pathSegments = pathArray[i].Split('.');
 
-                contentList.Add(index + "," + _contents[index]);
+                string plp = "";
+                for (int j = 0; j < pathSegments.Length; ++j)
+                {
+                    if (pathSegments[j].Last() == ']')
+                    {
+                        pathSegments[j] = pathSegments[j].Remove(pathSegments[j].IndexOf('['));
+                    }
+                    plp += pathSegments[j] + ".";
+                }
+                plp = plp.Remove(plp.Length - 1);
+
+                //only add this if it's not already been added
+                if (!orderedPathList.Contains(plp))
+                {
+                    orderedPathList.Add(plp);
+                }
+            }
+            //save them cleaned paths to file
+            File.WriteAllLines("Data\\index.txt", orderedPathList);
+
+            //this generates a complete list of data fields
+            List<string> contentList = new List<string>();
+            contentList.Add("Node,Type,Frequency");
+            
+            //
+            foreach (string index in pathList)
+            {
+                contentList.Add(index + "," + _types[index] + "," + _contents[index]);   
             }
             File.WriteAllLines("Data\\catalogue.csv", contentList.ToArray<string>());
         }
-
         RawData _rawTweets;
         List<Tweet> _tweets;
         List<JObject> _clippedTweets;
         Dictionary<string, int> _contents;
+        Dictionary<string, string> _types;
         List<JObject> _tweetObjects;
         string[] _whiteList;
     }
