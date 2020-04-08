@@ -18,18 +18,19 @@ namespace TweetClip
             [Option('d', "dataFilePath", Required = true, HelpText = "Relative path to the data json")]
             public string DataFilePath { get; set; }
 
-            [Option('c', "dataDictionaryFilePath", Required = false, HelpText = "Relative path to the config file")]
+            [Option('c', "configFilePath", Required = false, HelpText = "Relative path to the config file")]
             public string ConfigFilePath { get; set; }
 
-            [Option('s', "dataDictionaryFilePath", Required = false, HelpText = "strict match mode")]
+            [Option('s', "strictMatching", Required = false, HelpText = "strict match mode")]
             public bool StrictMode { get; set; }
 
-            [Option('w', "dataDictionaryFilePath", Required = false, HelpText = "wide match mode")]
+            [Option('w', "wideMatching", Required = false, HelpText = "wide match mode")]
             public bool WideMode { get; set; }
 
-            [Option('e', "dataDictionaryFilePath", Required = false, HelpText = "explicit match mode (default)")]
+            [Option('e', "explicitMatching", Required = false, HelpText = "explicit match mode (default)")]
             public bool ExplicitMode { get; set; }
         }
+
         public enum modeFlags
         {
             WIDE = 0,

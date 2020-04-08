@@ -281,20 +281,28 @@ namespace TweetClip
                 }
             }
 
-            //if the parent is a property we need to walk up the tree
-            if (parent.Type == JTokenType.Property)
+            if (target.Type != JTokenType.Array)
             {
-                ClipAndWalk(parent);
-            }
-            else
-            {
-                if (target.Type != JTokenType.Array)
+                //if the parent is a property we need to walk up the tree
+                if (parent.Type == JTokenType.Property)
+                {
+                    ClipAndWalk(parent);
+                }
+                else
                 {
                     target.Remove();
                 }
-                //only remove arrays where they are empty
-                //avoids mistaken clearance of leaves
-                else if(target.Children().Count() == 0)
+            }
+            //only remove arrays where they are empty
+            //avoids mistaken clearance of leaves
+            else if (target.Children().Count() == 0)
+            {
+                //if the parent is a property we need to walk up the tree
+                if (parent.Type == JTokenType.Property)
+                {
+                    ClipAndWalk(parent);
+                }
+                else
                 {
                     target.Remove();
                 }
