@@ -24,12 +24,15 @@ namespace TweetClip
             [Option('s', "dataDictionaryFilePath", Required = false, HelpText = "strict match mode")]
             public bool StrictMode { get; set; }
 
-            [Option('e', "dataDictionaryFilePath", Required = false, HelpText = "explicit match mode")]
+            [Option('w', "dataDictionaryFilePath", Required = false, HelpText = "wide match mode")]
+            public bool WideMode { get; set; }
+
+            [Option('e', "dataDictionaryFilePath", Required = false, HelpText = "explicit match mode (default)")]
             public bool ExplicitMode { get; set; }
         }
         public enum modeFlags
         {
-            LOOSE = 0,
+            WIDE = 0,
             STRICT,
             EXPLICIT,
             INDEX
@@ -37,14 +40,13 @@ namespace TweetClip
 
         static void Main(string[] args)
         {
-
             //-------------------------    read in file(s)    -------------------------
             string[] dataFiles = null;
             string[] configFiles = null;
             TweetClipper tc = new TweetClipper();
 
             //get the target file from arguments (Options)
-            modeFlags cMode = modeFlags.LOOSE;
+            modeFlags cMode = modeFlags.EXPLICIT;
 
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts =>
@@ -56,28 +58,34 @@ namespace TweetClip
                     {
                         configFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "Data\\" + opts.ConfigFilePath);
                     }
-                    if(opts.StrictMode)
+                    if (opts.WideMode)
+                    {
+                        cMode = modeFlags.WIDE;
+                    }
+                    //if both -s & -w go strict
+                    if (opts.StrictMode)
                     {
                         cMode = modeFlags.STRICT;
                     }
-                    //if both -s & -e go explicit
-                    if(opts.ExplicitMode)
+                    //if -e included
+                    if (opts.ExplicitMode)
                     {
                         cMode = modeFlags.EXPLICIT;
                     }
                 });
 
+            //index mode
             if (dataFiles != null && configFiles == null)
             {
-                
                 Console.WriteLine("config not included; index mode started\nPrcessing \"" + dataFiles[0] + "\"");
-                if (cMode != modeFlags.LOOSE)
+                if (cMode != modeFlags.WIDE)
                 {
                     Console.WriteLine("note: clip modes ignored in this mode");
                 }
                 tc.IndexMode(dataFiles, modeFlags.INDEX);
             }
-            else if (dataFiles.Length > 0 && configFiles.Length > 0)
+            //clip mode
+            else if (dataFiles != null && configFiles != null)
             {
                 Console.WriteLine("Config found, clipping mode started\nProcessing \"" + dataFiles[0] + "\"");
                 tc.ClipMode(dataFiles, configFiles, cMode);

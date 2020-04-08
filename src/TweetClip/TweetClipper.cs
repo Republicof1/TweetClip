@@ -33,9 +33,9 @@ namespace TweetClip
             //select the search mode
             switch (mode)
             {
-                case modeFlags.LOOSE:
+                case modeFlags.WIDE:
                     {
-                        blackListPtr = MakeBlackList_Loose;
+                        blackListPtr = MakeBlackList_Wide;
                     }
                     break;
                 case modeFlags.STRICT:
@@ -81,8 +81,9 @@ namespace TweetClip
         //make a composite list from the whitelist that we'll use to prune the copied tweet
         
         //partial match ignoring indices
-        private string[] MakeBlackList_Loose(string[] whiteList)
+        private string[] MakeBlackList_Wide(string[] whiteList)
         {
+            Console.WriteLine("searcing for matches using **Wide** algorithm");
             List<string> listr = _contents.Keys.ToList();
 
             for (int x = 0; x < whiteList.Length; ++x)
@@ -125,6 +126,7 @@ namespace TweetClip
         //inclusive (greater than) match ignoring indices
         private string[] MakeBlackList_Strict(string[] whiteList)
         {
+            Console.WriteLine("searcing for matches using **Strict** algorithm");
             List<string> listr = _contents.Keys.ToList();
 
             for (int x = 0; x < whiteList.Length; ++x)
@@ -188,6 +190,7 @@ namespace TweetClip
         //exact match ignoring indices
         private string[] MakeBlackList_Explicit(string[] whiteList)
         {
+            Console.WriteLine("searcing for matches using **Explicit** algorithm");
             List<string> contentArray = _contents.Keys.ToList();
             for(int i = 0; i < whiteList.Length; ++i)
             {
