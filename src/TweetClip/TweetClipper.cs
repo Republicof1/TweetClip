@@ -75,7 +75,20 @@ namespace TweetClip
                 clipTwStr.Add(_clippedTweets.Last().ToString());
             }
 
-            File.WriteAllLines("Data\\out.json", clipTwStr);
+            //File.WriteAllLines("Data\\out.json", clipTwStr);
+
+            //preparing files 
+            Console.WriteLine("Packaging tweets and saving to file");
+            string file = "";
+            for (int i = 0; i < clipTwStr.Count; ++i)
+            {
+                file += (clipTwStr[i] + ",\r\n");
+            }
+            string leadingInfo = "{ \"data\":[";
+            string trailingInfo = "]}";
+
+            file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
+            File.WriteAllText("Data\\out.json", file);
         }
 
         //make a composite list from the whitelist that we'll use to prune the copied tweet
