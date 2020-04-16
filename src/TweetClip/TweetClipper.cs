@@ -61,6 +61,8 @@ namespace TweetClip
             int count = 0;
             for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
+                Console.CursorTop = 0;
+                Console.CursorLeft = 0;
                 Console.WriteLine("Discovering tweet \"" + ++count + "\"");
                 _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
                 _tweets.Add(new Tweet(_tweetObjects.Last(), mode));
@@ -69,10 +71,13 @@ namespace TweetClip
             count = 0;
             foreach (JObject tweet in _tweetObjects)
             {
+                Console.CursorTop = 2;
+                Console.CursorLeft = 0;
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
                 string[] blackList = blackListPtr(_whiteList);
                 _clippedTweets.Add(ClipTweet(tweet, blackList));
-                clipTwStr.Add(_clippedTweets.Last().ToString());
+
+                clipTwStr.Add(_clippedTweets.Last().ToString().Replace("\r\n", "").Replace("  ", ""));
             }
 
             //File.WriteAllLines("Data\\out.json", clipTwStr);
@@ -82,12 +87,14 @@ namespace TweetClip
             string file = "";
             for (int i = 0; i < clipTwStr.Count; ++i)
             {
-                file += (clipTwStr[i] + ",\r\n");
-            }
-            string leadingInfo = "{ \"data\":[";
-            string trailingInfo = "]}";
 
-            file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
+                //file += (clipTwStr[i] + ",\r\n");
+                file += (clipTwStr[i] + "\r\n");
+            }
+            //string leadingInfo = "{ \"data\":[";
+            //string trailingInfo = "]}";
+
+            //file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
             File.WriteAllText("Data\\out.json", file);
         }
 
