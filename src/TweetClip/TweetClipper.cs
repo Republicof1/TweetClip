@@ -26,8 +26,9 @@ namespace TweetClip
             
         }
         public delegate string[] MakeBlackList(string[] whiteList);
+        public delegate string ProcessOutput(List<string> collectionOfClippedTweets);
 
-        public void ClipMode (string[] dataFiles, string[] configFiles, modeFlags mode)
+        public void ClipMode (string[] dataFiles, string[] configFiles, modeFlags mode, outputFlags output)
         {
             MakeBlackList blackListPtr = null;
             //select the search mode
@@ -49,7 +50,23 @@ namespace TweetClip
                     }
                     break;
             }
-               
+
+            ProcessOutput processOutputPtr = null;
+            //select the output mode
+            switch (output)
+            {
+                case outputFlags.RAW_JSON:
+                    {
+                        processOutputPtr = ProcessOutput_RawJSON;
+                    }
+                    break;
+                case outputFlags.JSON_ARRAY:
+                    {
+                        processOutputPtr = ProcessOutput_Array;
+                    }
+                    break;
+            }
+
             _rawTweets = new RawData(dataFiles[0]);
             
             //---------------------    map all contents, truncate, pseudonomise, and serialise and send to file    -------------------------
@@ -76,28 +93,44 @@ namespace TweetClip
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
                 string[] blackList = blackListPtr(_whiteList);
                 _clippedTweets.Add(ClipTweet(tweet, blackList));
-
+                //remove all new line
                 clipTwStr.Add(_clippedTweets.Last().ToString().Replace("\r\n", "").Replace("  ", ""));
             }
 
             //File.WriteAllLines("Data\\out.json", clipTwStr);
 
             //preparing files 
-            Console.WriteLine("Packaging tweets and saving to file");
+            
+            
+            File.WriteAllText("Data\\out.json", processOutputPtr(clipTwStr));
+        }
+
+        private string ProcessOutput_Array(List<string> clipTwStr)
+        {
+            Console.WriteLine("Packaging tweets as **JSON ARRAY** and saving to file");
             string file = "";
             for (int i = 0; i < clipTwStr.Count; ++i)
             {
-
-                //file += (clipTwStr[i] + ",\r\n");
-                file += (clipTwStr[i] + "\r\n");
+                file += (clipTwStr[i] + ",\r\n");
             }
-            //string leadingInfo = "{ \"data\":[";
-            //string trailingInfo = "]}";
+            string leadingInfo = "[";
+            string trailingInfo = "]";
 
-            //file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
-            File.WriteAllText("Data\\out.json", file);
+            file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
+            return file;
         }
 
+        private string ProcessOutput_RawJSON(List<string> clipTwStr)
+        {
+            Console.WriteLine("Packaging tweets as **RAW JSON** and saving to file");
+            string file = "";
+            for (int i = 0; i < clipTwStr.Count; ++i)
+            {
+                file += (clipTwStr[i] + "\r\n");
+            }
+
+            return file;
+        }
         //make a composite list from the whitelist that we'll use to prune the copied tweet
         
         //partial match ignoring indices

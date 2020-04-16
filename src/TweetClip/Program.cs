@@ -29,6 +29,9 @@ namespace TweetClip
 
             [Option('e', "explicitMatching", Required = false, HelpText = "explicit match mode (default)")]
             public bool ExplicitMode { get; set; }
+
+            [Option('a', "outputArray", Required = true, HelpText = "if present, output json within an annonyous array")]
+            public bool ArrayOutput { get; set; }
         }
 
         public enum modeFlags
@@ -37,6 +40,13 @@ namespace TweetClip
             STRICT,
             EXPLICIT,
             INDEX
+        }
+
+        public enum outputFlags
+        {
+            RAW_JSON = 0,
+            JSON_ARRAY,
+            CSV
         }
 
         static void Main(string[] args)
@@ -48,6 +58,7 @@ namespace TweetClip
 
             //get the target file from arguments (Options)
             modeFlags cMode = modeFlags.EXPLICIT;
+            outputFlags oMode = outputFlags.RAW_JSON;
 
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts =>
@@ -73,6 +84,11 @@ namespace TweetClip
                     {
                         cMode = modeFlags.EXPLICIT;
                     }
+                    //if -a included
+                    if (opts.ArrayOutput)
+                    {
+                        oMode = outputFlags.JSON_ARRAY;
+                    }
                 });
 
             //index mode
@@ -89,7 +105,7 @@ namespace TweetClip
             else if (dataFiles != null && configFiles != null)
             {
                 Console.WriteLine("Config found, clipping mode started\nProcessing \"" + dataFiles[0] + "\"");
-                tc.ClipMode(dataFiles, configFiles, cMode);
+                tc.ClipMode(dataFiles, configFiles, cMode, oMode);
             }
             else
             {
