@@ -30,7 +30,7 @@ namespace TweetClip
             [Option('e', "explicitMatching", Required = false, HelpText = "explicit match mode (default)")]
             public bool ExplicitMode { get; set; }
 
-            [Option('a', "outputArray", Required = true, HelpText = "if present, output json within an annonyous array")]
+            [Option('a', "outputArray", Required = false, HelpText = "if present, output json within an annonyous array")]
             public bool ArrayOutput { get; set; }
         }
 
