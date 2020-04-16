@@ -14,10 +14,19 @@ namespace TweetClip
         public Tweet(JToken data, modeFlags mode)
         {
             _nodes = new Dictionary<string, string>();
-            GenerateMap(data);
+
+            if (mode == modeFlags.INDEX)
+            {
+                GenerateMap_Index(data);
+            }
+            else
+            {
+                GenerateMap_Clip(data);
+            }
+
         }
 
-        void GenerateMap(JToken topJToken)
+        void GenerateMap_Index(JToken topJToken)
         {
             foreach (var jtoken in topJToken.Children())
             {
@@ -34,7 +43,21 @@ namespace TweetClip
                         _nodes.Add(jtoken.Path, jtoken.Type.ToString());
                     }
                 }
-                GenerateMap(jtoken);
+                GenerateMap_Index(jtoken);
+            };
+        }
+
+        void GenerateMap_Clip(JToken topJToken)
+        {
+            foreach (var jtoken in topJToken.Children())
+            {
+                if (jtoken.Children().Count() == 0)
+                {
+                    //if we get a null, this is *technically* a property value
+                    //instead we'll call this a property
+                    _nodes.Add(jtoken.Path, string.Join(",\n", jtoken.Parent.Values()));
+                }
+                GenerateMap_Clip(jtoken);
             };
         }
 
@@ -55,6 +78,11 @@ namespace TweetClip
 
                 }
             }
+        }
+
+        public Dictionary<String, String> Nodes
+        {
+            get { return _nodes; }
         }
 
         Dictionary<string, string> _nodes;

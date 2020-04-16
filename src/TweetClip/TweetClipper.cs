@@ -21,48 +21,55 @@ namespace TweetClip
             _tweetObjects = new List<JObject>();
             _contents = new Dictionary<string, int>();
             _types = new Dictionary<string, string>();
+            _clipTwStr = new List<string>();
             _rawTweets = null;
             _whiteList = null;
-            
+            _blackListPtr = null;
+            _processOutputPtr = null;
+
         }
-        public delegate string[] MakeBlackList(string[] whiteList);
-        public delegate string ProcessOutput(List<string> collectionOfClippedTweets);
+        public delegate string[] MakeBlackList();
+        public delegate void ProcessOutput();
 
         public void ClipMode (string[] dataFiles, string[] configFiles, modeFlags mode, outputFlags output)
         {
-            MakeBlackList blackListPtr = null;
+            
             //select the search mode
             switch (mode)
             {
                 case modeFlags.WIDE:
                     {
-                        blackListPtr = MakeBlackList_Wide;
+                        _blackListPtr = MakeBlackList_Wide;
                     }
                     break;
                 case modeFlags.STRICT:
                     {
-                        blackListPtr = MakeBlackList_Strict;
+                        _blackListPtr = MakeBlackList_Strict;
                     }
                     break;
                 case modeFlags.EXPLICIT:
                     {
-                        blackListPtr = MakeBlackList_Explicit;
+                        _blackListPtr = MakeBlackList_Explicit;
                     }
                     break;
             }
 
-            ProcessOutput processOutputPtr = null;
             //select the output mode
             switch (output)
             {
                 case outputFlags.RAW_JSON:
                     {
-                        processOutputPtr = ProcessOutput_RawJSON;
+                        _processOutputPtr = ProcessOutput_RawJSON;
                     }
                     break;
                 case outputFlags.JSON_ARRAY:
                     {
-                        processOutputPtr = ProcessOutput_Array;
+                        _processOutputPtr = ProcessOutput_Array;
+                    }
+                    break;
+                case outputFlags.CSV:
+                    {
+                        _processOutputPtr = ProcessOutput_CSV;
                     }
                     break;
             }
@@ -74,7 +81,6 @@ namespace TweetClip
             //map data and generate inital descriptive output
             _whiteList = File.ReadAllLines(configFiles[0]);
 
-            List<string> clipTwStr = new List<string>();
             int count = 0;
             for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
@@ -85,63 +91,126 @@ namespace TweetClip
                 _tweets.Add(new Tweet(_tweetObjects.Last(), mode));
                 _tweets.Last().Index(ref _contents, ref _types);
             }
-            count = 0;
+            
+            //preparing files 
+            _processOutputPtr();
+        }
+
+        //using the tweet object version of the data
+        private void ProcessOutput_CSV()
+        {
+            Console.WriteLine("Packaging tweets as **CSV TABLE** and saving to file");
+            //process for CSV
+            _blackListPtr();
+
+            int count = 0;
+ 
+            Dictionary<string, int> rowIndex = new Dictionary<string, int>();
+            
+            //add the header
+            List<string> table = new List<string>();
+            List<string> tableRow = new List<string>();
+
+            for (int j = 0; j < _whiteList.Length; ++j)
+            {
+                tableRow.Add(_whiteList[j]);
+            }
+            tableRow[tableRow.Count-1] = tableRow.Last().TrimEnd(',');
+            table.Add(tableRow.Aggregate((a,b) => a + "," + b));
+            
+            for (int i = 0; i < _tweets.Count; ++i)
+            {
+                tableRow = new List<string>();
+                Dictionary<string,string> tw = _tweets[i].Nodes;
+                List<string> twKeys = tw.Keys.ToList();
+
+                Console.CursorLeft = 0;
+                Console.CursorTop = 4;
+                Console.WriteLine("compiling table row \"" + ++count + "\"");
+                for (int j = 0; j < _whiteList.Length; ++j)
+                {
+                    string lookUp = _whiteList[j];
+
+                    if (twKeys.Contains(lookUp))
+                    {
+                        tableRow.Add("\"" + tw[lookUp] + "\"");
+                    }
+                    else
+                    {
+                        tableRow.Add("\"\"");
+                    }                   
+                }
+                table.Add(tableRow.Aggregate((a, b) => a + "," + b));
+            }
+
+            //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
+            Encoding utf8WithBom = new UTF8Encoding(true);
+            File.WriteAllLines("Data\\out_table.csv", table, utf8WithBom);
+        }
+        
+        //process for JSON
+        private void ProcessJSON()
+        {
+            int count = 0;
+
             foreach (JObject tweet in _tweetObjects)
             {
                 Console.CursorTop = 2;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
-                string[] blackList = blackListPtr(_whiteList);
+                string[] blackList = _blackListPtr();
                 _clippedTweets.Add(ClipTweet(tweet, blackList));
                 //remove all new line
-                clipTwStr.Add(_clippedTweets.Last().ToString().Replace("\r\n", "").Replace("  ", ""));
+                _clipTwStr.Add(_clippedTweets.Last().ToString().Replace("\r\n", "").Replace("  ", ""));
             }
-
-            //File.WriteAllLines("Data\\out.json", clipTwStr);
-
-            //preparing files 
-            
-            
-            File.WriteAllText("Data\\out.json", processOutputPtr(clipTwStr));
         }
 
-        private string ProcessOutput_Array(List<string> clipTwStr)
+        //using the string version of the data
+        private void ProcessOutput_Array()
         {
+            ProcessJSON();
+
             Console.WriteLine("Packaging tweets as **JSON ARRAY** and saving to file");
             string file = "";
-            for (int i = 0; i < clipTwStr.Count; ++i)
+            for (int i = 0; i < _clipTwStr.Count; ++i)
             {
-                file += (clipTwStr[i] + ",\r\n");
+                file += (_clipTwStr[i] + ",\r\n");
             }
             string leadingInfo = "[";
             string trailingInfo = "]";
 
             file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
-            return file;
+
+            
+            File.WriteAllText("Data\\out_a.json", file);
         }
 
-        private string ProcessOutput_RawJSON(List<string> clipTwStr)
+        //using the string version of the data
+        private void ProcessOutput_RawJSON()
         {
+            ProcessJSON();
+
             Console.WriteLine("Packaging tweets as **RAW JSON** and saving to file");
             string file = "";
-            for (int i = 0; i < clipTwStr.Count; ++i)
+            for (int i = 0; i < _clipTwStr.Count; ++i)
             {
-                file += (clipTwStr[i] + "\r\n");
+                file += (_clipTwStr[i] + "\r\n");
             }
 
-            return file;
+            File.WriteAllText("Data\\out.json", file);
         }
         //make a composite list from the whitelist that we'll use to prune the copied tweet
         
         //partial match ignoring indices
-        private string[] MakeBlackList_Wide(string[] whiteList)
+        private string[] MakeBlackList_Wide()
         {
             Console.WriteLine("searcing for matches using **Wide** algorithm");
             List<string> listr = _contents.Keys.ToList();
+            List<string> revisedWhitelist = new List<string>();
 
-            for (int x = 0; x < whiteList.Length; ++x)
+            for (int x = 0; x < _whiteList.Length; ++x)
             {
-                string[] targetSignature = whiteList[x].Split('.');
+                string[] targetSignature = _whiteList[x].Split('.');
                 //get rid of array indices
                 for (int i = 0; i < targetSignature.Length; ++i)
                 {
@@ -167,24 +236,29 @@ namespace TweetClip
 
                 for(int k = 0; k < foundFields.Length; ++k)
                 {
+                    revisedWhitelist.Add(foundFields[k]);
                     _contents.Remove(foundFields[k]);
                 }
-
-                int f = 0;
             }
+
+            //revise the white list to include all found targets
+            _whiteList = revisedWhitelist.ToArray();
+
             //retrieve the list in reverse order to preserve array indices
             return _contents.Keys.Reverse().ToArray();
         }
 
         //inclusive (greater than) match ignoring indices
-        private string[] MakeBlackList_Strict(string[] whiteList)
+        private string[] MakeBlackList_Strict()
         {
             Console.WriteLine("searcing for matches using **Strict** algorithm");
-            List<string> listr = _contents.Keys.ToList();
 
-            for (int x = 0; x < whiteList.Length; ++x)
+            List<string> listr = _contents.Keys.ToList();
+            List<string> revisedWhitelist = new List<string>();
+
+            for (int x = 0; x < _whiteList.Length; ++x)
             {
-                string[] targetSignature = whiteList[x].Split('.');
+                string[] targetSignature = _whiteList[x].Split('.');
                 //get rid of array indices
                 for (int i = 0; i < targetSignature.Length; ++i)
                 {
@@ -233,22 +307,28 @@ namespace TweetClip
 
                 for (int k = 0; k < foundFields.Length; ++k)
                 {
+                    revisedWhitelist.Add(foundFields[k]);
                     _contents.Remove(foundFields[k]);
                 }
             }
+
+            //revise the white list to include all found targets
+            _whiteList = revisedWhitelist.ToArray();
             //retrieve the list in reverse order to preserve array indices
             return _contents.Keys.Reverse().ToArray();
         }
 
         //exact match ignoring indices
-        private string[] MakeBlackList_Explicit(string[] whiteList)
+        private string[] MakeBlackList_Explicit()
         {
+            List<string> revisedWhitelist = new List<string>();
+
             Console.WriteLine("searcing for matches using **Explicit** algorithm");
             List<string> contentArray = _contents.Keys.ToList();
-            for(int i = 0; i < whiteList.Length; ++i)
+            for(int i = 0; i < _whiteList.Length; ++i)
             {
                 //clean the whiteList item of array indices
-                string[] whiteListSegments = whiteList[i].Split('.');
+                string[] whiteListSegments = _whiteList[i].Split('.');
                 //get rid of array indices
                 string wlp = "";
                 for (int j = 0; j < whiteListSegments.Length; ++j)
@@ -289,9 +369,14 @@ namespace TweetClip
                 //if (_contents.Keys.Contains<string>(whiteList[i]))
                 for (int k = 0; k < contentTargets.Length; ++k)
                 {
+                    revisedWhitelist.Add(contentTargets[k]);
                     _contents.Remove(contentTargets[k]);
                 }
             }
+
+            //revise the white list to include all found targets
+            _whiteList = revisedWhitelist.ToArray();
+
             //retrieve the list in reverse order to preserve array indices
             return _contents.Keys.Reverse().ToArray();
         }
@@ -436,6 +521,10 @@ namespace TweetClip
             }
             File.WriteAllLines("Data\\catalogue.csv", contentList.ToArray<string>());
         }
+
+        MakeBlackList _blackListPtr;
+        ProcessOutput _processOutputPtr;
+
         RawData _rawTweets;
         List<Tweet> _tweets;
         List<JObject> _clippedTweets;
@@ -443,5 +532,6 @@ namespace TweetClip
         Dictionary<string, string> _types;
         List<JObject> _tweetObjects;
         string[] _whiteList;
+        List<string> _clipTwStr;
     }
 }

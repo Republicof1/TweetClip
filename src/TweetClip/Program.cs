@@ -32,6 +32,9 @@ namespace TweetClip
 
             [Option('a', "outputArray", Required = false, HelpText = "if present, output json within an annonyous array")]
             public bool ArrayOutput { get; set; }
+
+            [Option('t', "outputTable", Required = false, HelpText = "if present, output csv table")]
+            public bool CSVOutput { get; set; }
         }
 
         public enum modeFlags
@@ -88,6 +91,11 @@ namespace TweetClip
                     if (opts.ArrayOutput)
                     {
                         oMode = outputFlags.JSON_ARRAY;
+                    }
+                    //if -t, overwrite -a
+                    if (opts.CSVOutput)
+                    {
+                        oMode = outputFlags.CSV;
                     }
                 });
 
