@@ -99,6 +99,7 @@ namespace TweetClip
                     }
                 });
 
+            Console.Clear();
             //index mode
             if (dataFiles != null && configFiles == null)
             {

@@ -84,7 +84,8 @@ namespace TweetClip
             int count = 0;
             for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
-                Console.CursorTop = 0;
+
+                Console.CursorTop = 2;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Discovering tweet \"" + ++count + "\"");
                 _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
@@ -99,6 +100,8 @@ namespace TweetClip
         //using the tweet object version of the data
         private void ProcessOutput_CSV()
         {
+            Console.CursorTop = 3;
+            Console.CursorLeft = 0;
             Console.WriteLine("Packaging tweets as **CSV TABLE** and saving to file");
             //process for CSV
             _blackListPtr();
@@ -125,7 +128,7 @@ namespace TweetClip
                 List<string> twKeys = tw.Keys.ToList();
 
                 Console.CursorLeft = 0;
-                Console.CursorTop = 4;
+                Console.CursorTop = 5;
                 Console.WriteLine("compiling table row \"" + ++count + "\"");
                 for (int j = 0; j < _whiteList.Length; ++j)
                 {
@@ -143,9 +146,12 @@ namespace TweetClip
                 table.Add(tableRow.Aggregate((a, b) => a + "," + b));
             }
 
+            Console.WriteLine("table constructed, saving to file");
             //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
             Encoding utf8WithBom = new UTF8Encoding(true);
             File.WriteAllLines("Data\\out_table.csv", table, utf8WithBom);
+
+            
         }
         
         //process for JSON
@@ -155,7 +161,7 @@ namespace TweetClip
 
             foreach (JObject tweet in _tweetObjects)
             {
-                Console.CursorTop = 2;
+                Console.CursorTop =3;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
                 string[] blackList = _blackListPtr();
@@ -204,6 +210,7 @@ namespace TweetClip
         //partial match ignoring indices
         private string[] MakeBlackList_Wide()
         {
+
             Console.WriteLine("searcing for matches using **Wide** algorithm");
             List<string> listr = _contents.Keys.ToList();
             List<string> revisedWhitelist = new List<string>();
@@ -470,6 +477,8 @@ namespace TweetClip
             int count = 0;
             foreach (string tw in _rawTweets.Data)
             {
+                Console.CursorTop = 3;
+                Console.CursorLeft = 0;
                 Console.WriteLine("Exploring tweet \"" + ++count + "\"");
                 JObject tweetObject = JObject.Parse(tw);
                 _tweets.Add(new Tweet(tweetObject, mode));
@@ -510,6 +519,7 @@ namespace TweetClip
             //save them cleaned paths to file
             File.WriteAllLines("Data\\index.txt", orderedPathList);
 
+            Console.WriteLine("Exploration complete!\nIndex file produced");
             //this generates a complete list of data fields
             List<string> contentList = new List<string>();
             contentList.Add("Node,Type,Frequency");
@@ -520,6 +530,7 @@ namespace TweetClip
                 contentList.Add(index + "," + _types[index] + "," + _contents[index]);   
             }
             File.WriteAllLines("Data\\catalogue.csv", contentList.ToArray<string>());
+            Console.WriteLine("Catalogue file produced");
         }
 
         MakeBlackList _blackListPtr;
