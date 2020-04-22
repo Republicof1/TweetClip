@@ -33,6 +33,9 @@ namespace TweetClip
             [Option('a', "outputArray", Required = false, HelpText = "if present, output json within an annonyous array")]
             public bool ArrayOutput { get; set; }
 
+            [Option('k', "outputArray", Required = false, HelpText = "if present, output json in a format ready for upload to ELK stack")]
+            public bool ElasticOutput { get; set; }
+
             [Option('t', "outputTable", Required = false, HelpText = "if present, output csv table")]
             public bool CSVOutput { get; set; }
         }
@@ -49,6 +52,7 @@ namespace TweetClip
         {
             RAW_JSON = 0,
             JSON_ARRAY,
+            ELASTIC_JSON,
             CSV
         }
 
@@ -86,6 +90,11 @@ namespace TweetClip
                     if (opts.ExplicitMode)
                     {
                         cMode = modeFlags.EXPLICIT;
+                    }
+                    //if -k included
+                    if (opts.ElasticOutput)
+                    {
+                        oMode = outputFlags.ELASTIC_JSON;
                     }
                     //if -a included
                     if (opts.ArrayOutput)

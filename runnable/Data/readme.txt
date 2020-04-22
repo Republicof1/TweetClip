@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 1.4.0
+Version 1.4.5
 ==============================
 
 ][Description][
@@ -34,13 +34,15 @@ root
 
 ][Arguments][
 
--d | dataFilePath     | Relative path to the data json | REQUIRED (when supplied alone triggers Index mode)
--c | configFilePath   | Relative path to the config file | OPTIONAL (when present triggers Clipping mode)
--e | explicitMatching | explicit clipping mode | OPTIONAL (default matching algorithm)
--s | strictMatching   | strict clipping mode | OPTIONAL 
--w | wideMatching     | wide clipping mode | OPTIONAL 
--a | jsonArrayWrapper | in clipping mode, output JSON is wrapped within an array 
--t | tableOutput      | outputs a CSV instead of json output
+-d | dataFilePath         | Relative path to the data json 								| REQUIRED (when supplied alone triggers Index mode)
+-c | configFilePath       | Relative path to the config file 								| OPTIONAL (when present triggers Clipping mode)
+-e | explicitMatching     | explicit clipping mode 									| OPTIONAL (default matching algorithm)
+-s | strictMatching       | strict clipping mode 									| OPTIONAL 
+-w | wideMatching         | wide clipping mode 										| OPTIONAL 
+-a | jsonArrayWrapper     | in clipping mode, output JSON is wrapped within an array 					| OPTIONAL
+-k | elasticsearch	  | outputs newline delineated JSON with metadata sufficent to bulk import into the ELK stack   | OPTIONAL
+-t | tableOutput          | outputs a CSV instead of json output 							| OPTIONAL
+
 
 =============================
 
@@ -73,6 +75,7 @@ root
 
    using jsonArrayWrapper turns {tweet}{tweet}{tweet} into [{tweet},{tweet},{tweet}]
    using tableOutput returns a tabular form of the whitelisted fields in UTF-8 format 
+   usnig elasticsearch returns formatted nd-JSON with metadata ready to _bulk import into elasticsearch
 
 =============================
 

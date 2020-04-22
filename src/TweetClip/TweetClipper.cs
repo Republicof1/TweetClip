@@ -72,6 +72,11 @@ namespace TweetClip
                         _processOutputPtr = ProcessOutput_CSV;
                     }
                     break;
+                case outputFlags.ELASTIC_JSON:
+                    {
+                        _processOutputPtr = ProcessOutput_Elastic;
+                    }
+                    break;
             }
 
             _rawTweets = new RawData(dataFiles[0]);
@@ -189,6 +194,27 @@ namespace TweetClip
 
             
             File.WriteAllText("Data\\out_a.json", file);
+        }
+
+        //using the string version of the data
+        private void ProcessOutput_Elastic()
+        {
+            ProcessJSON();
+
+            Console.WriteLine("Packaging tweets as **ELASTIC COMPATIBLE JSON COLLECTION** and saving to file");
+            string file = "";
+            for (int i = 0; i < _clipTwStr.Count; ++i)
+            {
+                //file += (_clipTwStr[i] + "\r\n");
+                file += ("{ \"index\" : { \"_id\" : \"" + i + "\" } }\r\n" + _clipTwStr[i] + "\r\n");
+            }
+            
+            string trailingInfo = "\n";
+
+            file = file.Remove(file.Length - 3) + trailingInfo;
+
+
+            File.WriteAllText("Data\\out_k.json", file);
         }
 
         //using the string version of the data
