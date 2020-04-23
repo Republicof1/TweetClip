@@ -38,6 +38,9 @@ namespace TweetClip
 
             [Option('t', "outputTable", Required = false, HelpText = "if present, output csv table")]
             public bool CSVOutput { get; set; }
+
+            [Option('x', "symbolise", Required = false, HelpText = "if present, replaces screen names and @names with proxy symbols")]
+            public bool Symbolise { get; set; }
         }
 
         public enum modeFlags
@@ -61,7 +64,9 @@ namespace TweetClip
             //-------------------------    read in file(s)    -------------------------
             string[] dataFiles = null;
             string[] configFiles = null;
+            string[] codexFiles = null;
             TweetClipper tc = new TweetClipper();
+            bool symbolise = false;
 
             //get the target file from arguments (Options)
             modeFlags cMode = modeFlags.EXPLICIT;
@@ -106,7 +111,14 @@ namespace TweetClip
                     {
                         oMode = outputFlags.CSV;
                     }
+
+                    symbolise = opts.Symbolise;
                 });
+
+            if (symbolise)
+            {
+                codexFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "full-codex.codex");
+            }
 
             Console.Clear();
             //index mode
@@ -123,7 +135,7 @@ namespace TweetClip
             else if (dataFiles != null && configFiles != null)
             {
                 Console.WriteLine("Config found, clipping mode started\nProcessing \"" + dataFiles[0] + "\"");
-                tc.ClipMode(dataFiles, configFiles, cMode, oMode);
+                tc.ClipMode(dataFiles, configFiles, codexFiles, cMode, oMode);
             }
             else
             {

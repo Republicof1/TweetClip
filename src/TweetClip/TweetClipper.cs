@@ -26,14 +26,14 @@ namespace TweetClip
             _whiteList = null;
             _blackListPtr = null;
             _processOutputPtr = null;
+            _codex = null; 
 
         }
         public delegate string[] MakeBlackList();
         public delegate void ProcessOutput();
 
-        public void ClipMode (string[] dataFiles, string[] configFiles, modeFlags mode, outputFlags output)
+        public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, modeFlags mode, outputFlags output)
         {
-            
             //select the search mode
             switch (mode)
             {
@@ -79,6 +79,13 @@ namespace TweetClip
                     break;
             }
 
+            //if codex is required boot up the list
+            if (codexFiles != null)
+            {
+                Console.WriteLine("Building proxy symbols from codex");
+                _codex = new Codex(File.ReadAllLines(codexFiles[0]));
+            }
+
             _rawTweets = new RawData(dataFiles[0]);
             
             //---------------------    map all contents, truncate, pseudonomise, and serialise and send to file    -------------------------
@@ -90,11 +97,11 @@ namespace TweetClip
             for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
 
-                Console.CursorTop = 2;
+                Console.CursorTop = 3;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Discovering tweet \"" + ++count + "\"");
                 _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
-                _tweets.Add(new Tweet(_tweetObjects.Last(), mode));
+                _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _codex));
                 _tweets.Last().Index(ref _contents, ref _types);
             }
             
@@ -105,7 +112,7 @@ namespace TweetClip
         //using the tweet object version of the data
         private void ProcessOutput_CSV()
         {
-            Console.CursorTop = 3;
+            Console.CursorTop = 4;
             Console.CursorLeft = 0;
             Console.WriteLine("Packaging tweets as **CSV TABLE** and saving to file");
             //process for CSV
@@ -133,7 +140,7 @@ namespace TweetClip
                 List<string> twKeys = tw.Keys.ToList();
 
                 Console.CursorLeft = 0;
-                Console.CursorTop = 5;
+                Console.CursorTop = 6;
                 Console.WriteLine("compiling table row \"" + ++count + "\"");
                 for (int j = 0; j < _whiteList.Length; ++j)
                 {
@@ -166,7 +173,7 @@ namespace TweetClip
 
             foreach (JObject tweet in _tweetObjects)
             {
-                Console.CursorTop =3;
+                Console.CursorTop = 4;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Clipping tweet \"" + ++count + "\"");
                 string[] blackList = _blackListPtr();
@@ -205,7 +212,6 @@ namespace TweetClip
             string file = "";
             for (int i = 0; i < _clipTwStr.Count; ++i)
             {
-                //file += (_clipTwStr[i] + "\r\n");
                 file += ("{ \"index\" : { \"_id\" : \"" + i + "\" } }\r\n" + _clipTwStr[i] + "\r\n");
             }
             
@@ -503,7 +509,7 @@ namespace TweetClip
             int count = 0;
             foreach (string tw in _rawTweets.Data)
             {
-                Console.CursorTop = 3;
+                Console.CursorTop = 4;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Exploring tweet \"" + ++count + "\"");
                 JObject tweetObject = JObject.Parse(tw);
@@ -563,6 +569,7 @@ namespace TweetClip
         ProcessOutput _processOutputPtr;
 
         RawData _rawTweets;
+        Codex _codex;
         List<Tweet> _tweets;
         List<JObject> _clippedTweets;
         Dictionary<string, int> _contents;
