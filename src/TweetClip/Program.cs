@@ -12,6 +12,9 @@ namespace TweetClip
 {
     class Program
     {
+        //global folder address
+        public static string OUTPUT_FOLDER = "Data\\";
+
         //args definitions
         public class Options
         {
@@ -87,10 +90,10 @@ namespace TweetClip
                 {
                     string directory = Directory.GetCurrentDirectory();
 
-                    dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "Data\\" + opts.DataFilePath);
+                    dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath);
                     if (opts.ConfigFilePath != null)
                     {
-                        configFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "Data\\" + opts.ConfigFilePath);
+                        configFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.ConfigFilePath);
                     }
                     if(opts.OutputFilePath != null)
                     {

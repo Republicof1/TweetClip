@@ -35,14 +35,14 @@ namespace TweetClip
 
         public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, string outFilename, modeFlags mode, outputFlags output)
         {
-            _outputFilename = outFilename;
+            _outputFilename = OUTPUT_FOLDER + outFilename;
 
             //stip off any extensions
             if (outFilename.Contains('.'))
             {
                 Console.CursorTop = 2;
                 Console.WriteLine("output file extension removed...");
-                _outputFilename = "Data\\" + outFilename.Split('.')[0];
+                _outputFilename = OUTPUT_FOLDER + outFilename.Split('.')[0];
             }
 
             //select the search mode
