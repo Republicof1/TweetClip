@@ -26,14 +26,25 @@ namespace TweetClip
             _whiteList = null;
             _blackListPtr = null;
             _processOutputPtr = null;
-            _codex = null; 
+            _codex = null;
+            _outputFilename = "";
 
         }
         public delegate string[] MakeBlackList();
         public delegate void ProcessOutput();
 
-        public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, modeFlags mode, outputFlags output)
+        public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, string outFilename, modeFlags mode, outputFlags output)
         {
+            _outputFilename = outFilename;
+
+            //stip off any extensions
+            if (outFilename.Contains('.'))
+            {
+                Console.CursorTop = 2;
+                Console.WriteLine("output file extension removed...");
+                _outputFilename = "Data\\" + outFilename.Split('.')[0] + "_clipped";
+            }
+
             //select the search mode
             switch (mode)
             {
@@ -96,7 +107,6 @@ namespace TweetClip
             int count = 0;
             for(int i = 0; i < _rawTweets.Data.Length; ++i)
             {
-
                 Console.CursorTop = 3;
                 Console.CursorLeft = 0;
                 Console.WriteLine("Discovering tweet \"" + ++count + "\"");
@@ -161,9 +171,7 @@ namespace TweetClip
             Console.WriteLine("table constructed, saving to file");
             //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
             Encoding utf8WithBom = new UTF8Encoding(true);
-            File.WriteAllLines("Data\\out_table.csv", table, utf8WithBom);
-
-            
+            File.WriteAllLines(_outputFilename + "_table.csv", table, utf8WithBom);
         }
         
         //process for JSON
@@ -200,7 +208,7 @@ namespace TweetClip
             file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
 
             
-            File.WriteAllText("Data\\out_a.json", file);
+            File.WriteAllText(_outputFilename + "_array.json", file);
         }
 
         //using the string version of the data
@@ -220,7 +228,7 @@ namespace TweetClip
             file = file.Remove(file.Length - 3) + trailingInfo;
 
 
-            File.WriteAllText("Data\\out_k.json", file);
+            File.WriteAllText(_outputFilename + "_ELK.json", file);
         }
 
         //using the string version of the data
@@ -235,7 +243,7 @@ namespace TweetClip
                 file += (_clipTwStr[i] + "\r\n");
             }
 
-            File.WriteAllText("Data\\out.json", file);
+            File.WriteAllText(_outputFilename + "_raw.json", file);
         }
         //make a composite list from the whitelist that we'll use to prune the copied tweet
         
@@ -577,5 +585,6 @@ namespace TweetClip
         List<JObject> _tweetObjects;
         string[] _whiteList;
         List<string> _clipTwStr;
+        string _outputFilename;
     }
 }

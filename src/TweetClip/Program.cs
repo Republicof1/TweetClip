@@ -21,6 +21,9 @@ namespace TweetClip
             [Option('c', "configFilePath", Required = false, HelpText = "Relative path to the config file")]
             public string ConfigFilePath { get; set; }
 
+            [Option('o', "outputFilePath", Required = false, HelpText = "if prenset, the name of the output file, note extesions will be ignored")]
+            public string OutputFilePath { get; set; }
+
             [Option('s', "strictMatching", Required = false, HelpText = "strict match mode")]
             public bool StrictMode { get; set; }
 
@@ -41,6 +44,9 @@ namespace TweetClip
 
             [Option('x', "symbolise", Required = false, HelpText = "if present, replaces screen names and @names with proxy symbols")]
             public bool Symbolise { get; set; }
+
+            [Option('m', "symbolise", Required = false, HelpText = "if present, produces a list of the fields returned in the output")]
+            public bool Manifest { get; set; }
         }
 
         public enum modeFlags
@@ -65,6 +71,7 @@ namespace TweetClip
             string[] dataFiles = null;
             string[] configFiles = null;
             string[] codexFiles = null;
+            string outputFilename = "";
             TweetClipper tc = new TweetClipper();
             bool symbolise = false;
 
@@ -81,6 +88,17 @@ namespace TweetClip
                     if (opts.ConfigFilePath != null)
                     {
                         configFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "Data\\" + opts.ConfigFilePath);
+                    }
+                    if(opts.OutputFilePath != null)
+                    {
+                        outputFilename = opts.OutputFilePath;
+                    }
+                    else
+                    {
+                        Console.CursorTop = 2;
+                        Console.WriteLine("using datafile name as output name");
+                        outputFilename = opts.DataFilePath;
+                        Console.CursorTop = 0;
                     }
                     if (opts.WideMode)
                     {
@@ -135,7 +153,7 @@ namespace TweetClip
             else if (dataFiles != null && configFiles != null)
             {
                 Console.WriteLine("Config found, clipping mode started\nProcessing \"" + dataFiles[0] + "\"");
-                tc.ClipMode(dataFiles, configFiles, codexFiles, cMode, oMode);
+                tc.ClipMode(dataFiles, configFiles, codexFiles, outputFilename, cMode, oMode);
             }
             else
             {
