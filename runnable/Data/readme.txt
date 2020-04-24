@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 1.7.1
+Version 1.7.2
 ==============================
 
 ][Description][
@@ -61,8 +61,12 @@ root
    catalogue.csv - a comprehensive model description of each filed found within the supplied json. This file includes one row for every array index found
    index.txt - a simplified form describing every structurally unique field found, e.g. 'a.b[0]' & 'a.b[1]' will produce a single row, 'a.b'
 
+   >>EXAMPLE COMMAND<<
+   take data.json and run index mode: 
+	tweetclip -d data.json
+
 - - clip mode - -
-   
+     
    \\input files: {data}.json, {cofig}.txt//
     {data}.json contains your json data
     {config}.json this file contains a whitelist of fields or patterns that you wish to be present in your export, 1 symbol per line; Fields can be copied directly from index.txt.
@@ -103,6 +107,10 @@ root
    using prototype returns a text list every serach term found with the present config file and clip mode
 
    using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note this process is random and will produce different symbols each time. However, symbols are consistent within each single output file.
+
+    >>EXAMPLE COMMAND<<
+   take data.json and run clip mode using config.txt renaming output files as results~ (-o); using wide clip mode (-w) and csv output mode (-t) and replace all user symbols (-x): 
+	tweetclip -d data.json -c config.txt -o results -w -t -x
 
 =============================
 
