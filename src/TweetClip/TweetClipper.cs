@@ -42,7 +42,7 @@ namespace TweetClip
             {
                 Console.CursorTop = 2;
                 Console.WriteLine("output file extension removed...");
-                _outputFilename = "Data\\" + outFilename.Split('.')[0] + "_clipped";
+                _outputFilename = "Data\\" + outFilename.Split('.')[0];
             }
 
             //select the search mode
@@ -88,6 +88,11 @@ namespace TweetClip
                         _processOutputPtr = ProcessOutput_Elastic;
                     }
                     break;
+                case outputFlags.PROTOTYPE:
+                    {
+                        _processOutputPtr = ProcessOutput_PrototypeList;
+                    }
+                    break;
             }
 
             //if codex is required boot up the list
@@ -117,6 +122,39 @@ namespace TweetClip
             
             //preparing files 
             _processOutputPtr();
+        }
+
+        //using the tweet object version of the data
+        private void ProcessOutput_PrototypeList()
+        {
+            Console.CursorTop = 4;
+            Console.CursorLeft = 0;
+            Console.WriteLine("preparing **PROTOTYPE LIST**");
+            //process for CSV
+            _blackListPtr();
+
+            int count = 0;
+
+            Dictionary<string, int> rowIndex = new Dictionary<string, int>();
+
+            //add the header
+            List<string> table = new List<string>();
+            List<string> tableRow = new List<string>();
+
+            for (int j = 0; j < _whiteList.Length; ++j)
+            {
+                tableRow.Add(_whiteList[j]);
+            }
+            tableRow[tableRow.Count - 1] = tableRow.Last().TrimEnd(',');
+            table.Add(tableRow.Aggregate((a, b) => a + "," + b));
+
+            Console.WriteLine("Prototype list constructed, saving to file");
+            //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
+
+            List<string> outWhiteList = _whiteList.ToList();
+            outWhiteList.Sort();
+
+            File.WriteAllLines(_outputFilename + "_prototype.txt", outWhiteList);
         }
 
         //using the tweet object version of the data

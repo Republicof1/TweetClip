@@ -42,11 +42,13 @@ namespace TweetClip
             [Option('t', "outputTable", Required = false, HelpText = "if present, output csv table")]
             public bool CSVOutput { get; set; }
 
+            [Option('p', "prototype run", Required = false, HelpText = "if present, produces a list of the fields returned given a specified search")]
+            public bool PrototypeOutput { get; set; }
+
             [Option('x', "symbolise", Required = false, HelpText = "if present, replaces screen names and @names with proxy symbols")]
             public bool Symbolise { get; set; }
 
-            [Option('m', "symbolise", Required = false, HelpText = "if present, produces a list of the fields returned in the output")]
-            public bool Manifest { get; set; }
+            
         }
 
         public enum modeFlags
@@ -62,7 +64,8 @@ namespace TweetClip
             RAW_JSON = 0,
             JSON_ARRAY,
             ELASTIC_JSON,
-            CSV
+            CSV,
+            PROTOTYPE
         }
 
         static void Main(string[] args)
@@ -128,6 +131,11 @@ namespace TweetClip
                     if (opts.CSVOutput)
                     {
                         oMode = outputFlags.CSV;
+                    }
+                    //if -t, overwrite -a
+                    if (opts.PrototypeOutput)
+                    {
+                        oMode = outputFlags.PROTOTYPE;
                     }
 
                     symbolise = opts.Symbolise;

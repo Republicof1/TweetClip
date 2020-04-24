@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 1.6.0
+Version 1.7.1
 ==============================
 
 ][Description][
@@ -43,6 +43,7 @@ root
 -a | jsonArrayWrapper     | in clipping mode, output JSON is wrapped within an array 					| OPTIONAL
 -k | elasticsearch	  | outputs newline delineated JSON with metadata sufficent to bulk import into the ELK stack   | OPTIONAL
 -t | tableOutput          | outputs a CSV instead of json output 							| OPTIONAL
+-p | prototypeOutput      | outputs a list of the all search results based on the current clip mode			| OPTIONAL
 -x | symbolReplacement    | all names are replace in the output - symbols are randomly EACH time			| OPTIONAL
 
 =============================
@@ -94,9 +95,12 @@ root
 		search "user.name" ==> […]user.name[…]
 		search "quoted_status.user.name" ==> […]quoted_status.user.name[…] - e.g. *quoted_status.user.name*; retweeted_status.*quoted_status*.*user*.*name*
 
+   
+
    using jsonArrayWrapper turns {tweet}{tweet}{tweet} into [{tweet},{tweet},{tweet}]
    using tableOutput returns a tabular form of the whitelisted fields in UTF-8 format 
    using elasticsearch returns formatted nd-JSON with metadata ready to _bulk import into elasticsearch
+   using prototype returns a text list every serach term found with the present config file and clip mode
 
    using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note this process is random and will produce different symbols each time. However, symbols are consistent within each single output file.
 
