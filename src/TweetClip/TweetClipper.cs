@@ -122,6 +122,11 @@ namespace TweetClip
             
             //preparing files 
             _processOutputPtr();
+
+            if (codexFiles != null)
+            {
+                _codex.WriteHisory();
+            }
         }
 
         //using the tweet object version of the data
@@ -132,8 +137,6 @@ namespace TweetClip
             Console.WriteLine("preparing **PROTOTYPE LIST**");
             //process for CSV
             _blackListPtr();
-
-            int count = 0;
 
             Dictionary<string, int> rowIndex = new Dictionary<string, int>();
 
@@ -414,6 +417,7 @@ namespace TweetClip
             {
                 //clean the whiteList item of array indices
                 string[] whiteListSegments = _whiteList[i].Split('.');
+                
                 //get rid of array indices
                 string wlp = "";
                 for (int j = 0; j < whiteListSegments.Length; ++j)
@@ -425,7 +429,6 @@ namespace TweetClip
                     wlp += whiteListSegments[j] + ".";
                 }
                 wlp = wlp.Remove(wlp.Length - 1);
-
 
                 //get all matches to pattern
                 string[] contentTargets = contentArray.FindAll(delegate (
@@ -451,7 +454,6 @@ namespace TweetClip
                 }).ToArray();
 
 
-                //if (_contents.Keys.Contains<string>(whiteList[i]))
                 for (int k = 0; k < contentTargets.Length; ++k)
                 {
                     revisedWhitelist.Add(contentTargets[k]);

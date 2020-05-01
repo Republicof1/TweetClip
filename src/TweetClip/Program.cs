@@ -51,7 +51,11 @@ namespace TweetClip
             [Option('x', "symbolise", Required = false, HelpText = "if present, replaces screen names and @names with proxy symbols")]
             public bool Symbolise { get; set; }
 
-            
+            [Option('r', "RefreshSymbols", Required = false, HelpText = "if present, refreshes the symbol history meaining before running")]
+            public bool RefreshSymbols { get; set; }
+
+            //[Option('r', "ReuseSymbols", Required = false, HelpText = "if present, reuses the symbol history from the previous run")]
+            //public bool ReuseSymbols { get; set; }
         }
 
         public enum modeFlags
@@ -140,6 +144,16 @@ namespace TweetClip
                     {
                         oMode = outputFlags.PROTOTYPE;
                     }
+
+                    if (opts.RefreshSymbols)
+                    {
+                        File.WriteAllLines("codexHistory.cdxh", new string[] { });
+                    }
+
+                    //if (!opts.ReuseSymbols)
+                    //{
+                    //    File.WriteAllLines("codexHistory.cdxh", new string[] { });
+                    //}
 
                     symbolise = opts.Symbolise;
                 });

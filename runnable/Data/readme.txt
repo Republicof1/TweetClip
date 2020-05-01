@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 1.7.2
+Version 1.8.0
 ==============================
 
 ][Description][
@@ -26,6 +26,8 @@ It was built to support work on twitter data, but will work with any json data.
 root
  |--CommandLine.dll
  |--Newtonsoft.json.dll
+ |--full-codex.codex
+ |--codexHistory.cdxh
  |--TweetClip.exe
  |--Data
      |--Readme.txt
@@ -45,6 +47,7 @@ root
 -t | tableOutput          | outputs a CSV instead of json output 							| OPTIONAL
 -p | prototypeOutput      | outputs a list of the all search results based on the current clip mode			| OPTIONAL
 -x | symbolReplacement    | all names are replace in the output - symbols are randomly EACH time			| OPTIONAL
+-r | reuseSymbols         | maintain a history resource if present							| OPTIONAL
 
 =============================
 
@@ -99,18 +102,17 @@ root
 		search "user.name" ==> […]user.name[…]
 		search "quoted_status.user.name" ==> […]quoted_status.user.name[…] - e.g. *quoted_status.user.name*; retweeted_status.*quoted_status*.*user*.*name*
 
-   
+   using jsonArrayWrapper turns {tweet}{tweet}{tweet} into [{tweet},{tweet},{tweet}].
+   using tableOutput returns a tabular form of the whitelisted fields in UTF-8 format.
+   using elasticsearch returns formatted nd-JSON with metadata ready to _bulk import into elasticsearch.
+   using prototype returns a text list every serach term found with the present config file and clip mode.
 
-   using jsonArrayWrapper turns {tweet}{tweet}{tweet} into [{tweet},{tweet},{tweet}]
-   using tableOutput returns a tabular form of the whitelisted fields in UTF-8 format 
-   using elasticsearch returns formatted nd-JSON with metadata ready to _bulk import into elasticsearch
-   using prototype returns a text list every serach term found with the present config file and clip mode
-
-   using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note this process is random and will produce different symbols each time. However, symbols are consistent within each single output file.
+   using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms.
+   using refreshSymbols means that the system will delete the record of used symbols and will start again. In this case a given replacement symbol is likely to be reused for a new handle but will remain consistent in subsequent runs without this flag.
 
     >>EXAMPLE COMMAND<<
-   take data.json and run clip mode using config.txt renaming output files as results~ (-o); using wide clip mode (-w) and csv output mode (-t) and replace all user symbols (-x): 
-	tweetclip -d data.json -c config.txt -o results -w -t -x
+   take data.json and run clip mode using config.txt renaming output files as results~ (-o); using wide clip mode (-w) and csv output mode (-t) and replace all user symbols (-x) with consistent historic symbol set (-r): 
+	tweetclip -d data.json -c config.txt -o results -w -t -x -r
 
 =============================
 
@@ -119,5 +121,4 @@ root
 Jobs left to do:
 
 batch job
-annonimity - 50%
 

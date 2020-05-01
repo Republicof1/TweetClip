@@ -4,6 +4,7 @@ using System.Threading;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace TweetClip
 {
@@ -18,12 +19,12 @@ namespace TweetClip
             _rhsIndex = 1;
 
             _rawCodex = new List<string>(codexList);
-            _screenNameList = new List<string>();
+            _replacementList = new List<string>();
             _codexSegments = new List<List<string>>();
-            _nameList = new List<string>();
-            _screennameProxys = new Dictionary<string, string>();
-            _nameProxys = new Dictionary<string, string>();
+            _proxyPairs = new Dictionary<string, string>();
+            _suppliedProxys = new Dictionary<string, string>();
 
+            
             //get the headers out of the codex
             List<string> listLimitSymbols = _rawCodex.FindAll(delegate (string symbol)
                 {
@@ -64,33 +65,60 @@ namespace TweetClip
             {
                 for (int j = 0; j < _codexSegments[_rhsIndex].Count; ++j)
                 {
-                    _screenNameList.Add(_codexSegments[_lhsIndex][i] + "_" + _codexSegments[_rhsIndex][j]);
+                    _replacementList.Add(_codexSegments[_lhsIndex][i] + "_" + _codexSegments[_rhsIndex][j]);
                 }
             }
 
             //shuffle the list
-            _screenNameList.Shuffle();
+            _replacementList.Shuffle();
+
+            //read in any existing pairs
+            ReadHisory();
         }
 
         public string Proxy(string handle)
         {
+            //often true with this is a screenName
             if (handle.Contains(" "))
             {
-                handle.Replace(" ", "_");
+                handle = handle.Replace(" ", "-");
             }
 
-            if (_screennameProxys.Keys.Contains(handle))
+            if (handle.Contains("@"))
             {
-                return _screennameProxys[handle];
+                //handle the rare case of inlines possessive appostrphe
+                if (handle.Contains("'s"))
+                {
+
+                    handle = handle.Replace("'s", "");
+                }
+
+                if (handle.Contains("’s"))
+                {
+
+                    handle = handle.Replace("’s", "");
+                }
+
+                //trim any trailing non alphanumeric characters to avoid hanndle duplication
+                //twitter's mysterious use of LRI and PDI characters is also handled here - '\u2066', '\u2069'
+                handle = handle.TrimEnd(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
+                handle = handle.TrimStart(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
             }
+
+            //if we already have a proxy for this, use that
+            if (_proxyPairs.Keys.Contains(handle))
+            {
+                return _proxyPairs[handle];
+            }
+            //if not allocate a new one - if were over bounds, refresh the list of proxies
             else
             {
-                _screennameProxys.Add(handle, _screenNameList[_currentIndex]);
-                if(_currentIndex >= _screenNameList.Count())
+                _proxyPairs.Add(handle, _replacementList[_currentIndex]);
+                if(_currentIndex >= _replacementList.Count())
                 {
                     RefreshProxyList();
                 }
-                return _screenNameList[_currentIndex++];
+                return _replacementList[_currentIndex++];
 
             }
         }
@@ -98,7 +126,8 @@ namespace TweetClip
         //if we run our of proxy names, then make some more
         private void RefreshProxyList()
         {
-            _screenNameList = new List<string>();
+            _replacementList = new List<string>();
+            WriteHisory();
             _currentIndex = 0;
 
             //access more codex segments
@@ -117,12 +146,45 @@ namespace TweetClip
             {
                 for (int j = 0; j < _codexSegments[_rhsIndex].Count; ++j)
                 {
-                    _screenNameList.Add(_codexSegments[_lhsIndex][i] + "_" + _codexSegments[_rhsIndex][j]);
+                    _replacementList.Add(_codexSegments[_lhsIndex][i] + "_" + _codexSegments[_rhsIndex][j]);
                 }
             }
 
-            _screenNameList.Shuffle();
+            _replacementList.Shuffle();
             
+        }
+
+        //??will this need tamperproofing
+        public void WriteHisory()
+        {
+            List<string> writeFile = new List<string>();
+            foreach(KeyValuePair<string, string> kvp in _proxyPairs)
+            {
+                //very helpful to me twitter banned the use of | in names
+                writeFile.Add(kvp.Key + "|" + kvp.Value);
+            }
+
+            File.WriteAllLines("codexHistory.cdxh", writeFile.ToArray());
+        }
+
+
+        //read in and clear the current history file
+        private void ReadHisory()
+        {
+            //read the file
+            string[] readFile = File.ReadAllLines("codexHistory.cdxh");
+
+            for (int i = 0; i < readFile.Length; ++i)
+            {
+                //split the pair and add it
+                string[] pair = readFile[i].Split('|');
+                //add to a collection of items that have been ingested
+                _suppliedProxys.Add(pair[0],pair[1]);
+                //add to the master proxy index
+                _proxyPairs.Add(pair[0], pair[1]);
+                //remove this name from the replacement list
+                _replacementList.Remove(pair[1]);
+            }
         }
 
         //indices for accessing stuff
@@ -134,13 +196,13 @@ namespace TweetClip
         List<string> _rawCodex;
         List<List<string>> _codexSegments;
         //collection by original screennames to proxy screennames
-        Dictionary<string, string> _screennameProxys;
-        //list of all possible screennames
-        List<string> _screenNameList;
+        Dictionary<string, string> _proxyPairs;
+        //list of all possible replacement names
+        List<string> _replacementList;
         //collection by original names to proxy names
-        Dictionary<string, string> _nameProxys;
-        //collection of all possible
-        List<string> _nameList;
+       
+        //collection supplied original names & proxy name pairs
+        Dictionary<string, string> _suppliedProxys;
     }
 
     //shuffle the names
