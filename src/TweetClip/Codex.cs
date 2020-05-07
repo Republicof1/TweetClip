@@ -127,7 +127,6 @@ namespace TweetClip
         private void RefreshProxyList()
         {
             _replacementList = new List<string>();
-            WriteHisory();
             _currentIndex = 0;
 
             //access more codex segments
@@ -152,6 +151,20 @@ namespace TweetClip
 
             _replacementList.Shuffle();
             
+        }
+
+        public void WriteHisoryToTable(string filename)
+        {
+            List<string> writeFile = new List<string>();
+            foreach (KeyValuePair<string, string> kvp in _proxyPairs)
+            {
+                //very helpful to me twitter banned the use of | in names
+                writeFile.Add("\"" + kvp.Key + "\",\"" + kvp.Value + "\"");
+            }
+
+            //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
+            Encoding utf8WithBom = new UTF8Encoding(true);
+            File.WriteAllLines(filename + "_codexKey.csv", writeFile.ToArray(), utf8WithBom);
         }
 
         //??will this need tamperproofing

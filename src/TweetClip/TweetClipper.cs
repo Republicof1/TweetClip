@@ -126,6 +126,7 @@ namespace TweetClip
             if (codexFiles != null)
             {
                 _codex.WriteHisory();
+                _codex.WriteHisoryToTable(_outputFilename);
             }
         }
 
@@ -152,7 +153,6 @@ namespace TweetClip
             table.Add(tableRow.Aggregate((a, b) => a + "," + b));
 
             Console.WriteLine("Prototype list constructed, saving to file");
-            //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
 
             List<string> outWhiteList = _whiteList.ToList();
             outWhiteList.Sort();
@@ -199,7 +199,16 @@ namespace TweetClip
 
                     if (twKeys.Contains(lookUp))
                     {
-                        tableRow.Add("\"" + tw[lookUp] + "\"");
+                        //replace internal " with utf left double quotation to avoid misread of truncated text that contains a "
+                        if (lookUp == "full_text")
+                        {
+                            string ft = tw[lookUp].Replace('"', '\u201C');
+                            tableRow.Add("\"" + ft + "\"");
+                        }
+                        else
+                        {
+                            tableRow.Add("\"" + tw[lookUp] + "\"");
+                        }
                     }
                     else
                     {

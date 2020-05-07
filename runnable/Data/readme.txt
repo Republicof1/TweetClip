@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 1.8.0
+Version 1.8.4
 ==============================
 
 ][Description][
@@ -107,7 +107,7 @@ root
    using elasticsearch returns formatted nd-JSON with metadata ready to _bulk import into elasticsearch.
    using prototype returns a text list every serach term found with the present config file and clip mode.
 
-   using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms.
+   using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~_codexKey.csv) containing each pair of original and replaced symbols.
    using refreshSymbols means that the system will delete the record of used symbols and will start again. In this case a given replacement symbol is likely to be reused for a new handle but will remain consistent in subsequent runs without this flag.
 
     >>EXAMPLE COMMAND<<
