@@ -113,11 +113,12 @@ namespace TweetClip
             //if not allocate a new one - if were over bounds, refresh the list of proxies
             else
             {
-                _proxyPairs.Add(handle, _replacementList[_currentIndex]);
+                
                 if(_currentIndex >= _replacementList.Count())
                 {
                     RefreshProxyList();
                 }
+                _proxyPairs.Add(handle, _replacementList[_currentIndex]);
                 return _replacementList[_currentIndex++];
 
             }
@@ -174,7 +175,7 @@ namespace TweetClip
             foreach(KeyValuePair<string, string> kvp in _proxyPairs)
             {
                 //very helpful to me twitter banned the use of | in names
-                writeFile.Add(kvp.Key + "|" + kvp.Value);
+                writeFile.Add(kvp.Key + "|@|" + kvp.Value);
             }
 
             File.WriteAllLines("codexHistory.cdxh", writeFile.ToArray());
@@ -190,7 +191,7 @@ namespace TweetClip
             for (int i = 0; i < readFile.Length; ++i)
             {
                 //split the pair and add it
-                string[] pair = readFile[i].Split('|');
+                string[] pair = readFile[i].Split(new string[] { "|@|" }, StringSplitOptions.None);
                 //add to a collection of items that have been ingested
                 _suppliedProxys.Add(pair[0],pair[1]);
                 //add to the master proxy index

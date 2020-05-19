@@ -1,0 +1,6 @@
+screen_name
+created_at
+hashtags.text
+full_text
+retweet_count
+favorite_count

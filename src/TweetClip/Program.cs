@@ -39,7 +39,7 @@ namespace TweetClip
             [Option('a', "outputArray", Required = false, HelpText = "if present, output json within an annonyous array")]
             public bool ArrayOutput { get; set; }
 
-            [Option('k', "outputArray", Required = false, HelpText = "if present, output json in a format ready for upload to ELK stack")]
+            [Option('k', "outputELKComplient", Required = false, HelpText = "if present, output json in a format ready for upload to ELK stack")]
             public bool ElasticOutput { get; set; }
 
             [Option('t', "outputTable", Required = false, HelpText = "if present, output csv table")]
@@ -75,6 +75,14 @@ namespace TweetClip
             PROTOTYPE
         }
 
+        public enum processStage
+        {
+            FIRST = 0,
+            IN_PROGRESS,
+            LAST,
+            COMPLETE
+        }
+
         static void Main(string[] args)
         {
             //-------------------------    read in file(s)    -------------------------
@@ -105,10 +113,10 @@ namespace TweetClip
                     }
                     else
                     {
-                        Console.CursorTop = 2;
+                        Console.SetCursorPosition(0, 2);
                         Console.WriteLine("using datafile name as output name");
                         outputFilename = opts.DataFilePath;
-                        Console.CursorTop = 0;
+                        Console.SetCursorPosition(0, 0);
                     }
                     if (opts.WideMode)
                     {
@@ -164,20 +172,27 @@ namespace TweetClip
             }
 
             Console.Clear();
+            Console.BackgroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Tweetclip - running");
+
             //index mode
             if (dataFiles != null && configFiles == null)
             {
-                Console.WriteLine("config not included; index mode started\nPrcessing \"" + dataFiles[0] + "\"");
-                if (cMode != modeFlags.WIDE)
-                {
-                    Console.WriteLine("note: clip modes ignored in this mode");
-                }
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.SetCursorPosition(0, 1);
+                Console.Write("Index mode started: Prcessing \"" + dataFiles[0] + "\"");
+
                 tc.IndexMode(dataFiles, modeFlags.INDEX);
             }
             //clip mode
             else if (dataFiles != null && configFiles != null)
             {
-                Console.WriteLine("Config found, clipping mode started\nProcessing \"" + dataFiles[0] + "\"");
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.SetCursorPosition(0, 1);
+                Console.Write("Clipping mode started: Processing \"" + dataFiles[0] + "\"");
                 tc.ClipMode(dataFiles, configFiles, codexFiles, outputFilename, cMode, oMode);
             }
             else
@@ -185,7 +200,15 @@ namespace TweetClip
                 Parser.Default.ParseArguments<Options>(args)
                .WithParsed<Options>(opts =>
                {
-                   Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found");
+                   Console.SetCursorPosition(0, 0);
+                   Console.BackgroundColor = ConsoleColor.Red;
+                   Console.ForegroundColor = ConsoleColor.Black;
+                   Console.WriteLine("Tweetclip - run failed");
+                   Console.BackgroundColor = ConsoleColor.Black;
+                   Console.ForegroundColor = ConsoleColor.Red;
+                   Console.SetCursorPosition(0, 1);
+                   Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found!");
+                   Console.WriteLine("Please check filepath is correct before running again");
                });
             }
 

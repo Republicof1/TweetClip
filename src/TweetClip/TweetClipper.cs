@@ -14,7 +14,7 @@ namespace TweetClip
 {
     class TweetClipper
     {
-        public TweetClipper()
+        public TweetClipper(int blocksize = 2000)
         {
             _tweets = new List<Tweet>();
             _clippedTweets = new List<JObject>();
@@ -28,10 +28,13 @@ namespace TweetClip
             _processOutputPtr = null;
             _codex = null;
             _outputFilename = "";
+            _blockSize = blocksize;
+            _processCount = 0;
 
         }
+
         public delegate string[] MakeBlackList();
-        public delegate void ProcessOutput();
+        public delegate processStage ProcessOutput(processStage stage);
 
         public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, string outFilename, modeFlags mode, outputFlags output)
         {
@@ -98,43 +101,80 @@ namespace TweetClip
             //if codex is required boot up the list
             if (codexFiles != null)
             {
+                Console.SetCursorPosition(0, 2);
+                Console.WriteLine("                                                              ");
+                Console.SetCursorPosition(0, 2);
                 Console.WriteLine("Building proxy symbols from codex");
                 _codex = new Codex(File.ReadAllLines(codexFiles[0]));
             }
 
-            _rawTweets = new RawData(dataFiles[0]);
-            
+            StreamReader file = null;
+            try
+            {
+                file = File.OpenText(dataFiles[0]);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Can't read the text in this file");
+            }
+
             //---------------------    map all contents, truncate, pseudonomise, and serialise and send to file    -------------------------
 
             //map data and generate inital descriptive output
-            _whiteList = File.ReadAllLines(configFiles[0]);
+            string[] whiteListCache = File.ReadAllLines(configFiles[0]);
 
-            int count = 0;
-            for(int i = 0; i < _rawTweets.Data.Length; ++i)
+            _processCount = 0;
+            processStage pStage = processStage.FIRST;
+
+            do
             {
-                Console.CursorTop = 3;
-                Console.CursorLeft = 0;
-                Console.WriteLine("Discovering tweet \"" + ++count + "\"");
-                _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
-                _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _codex));
-                _tweets.Last().Index(ref _contents, ref _types);
-            }
-            
-            //preparing files 
-            _processOutputPtr();
+                _whiteList = new string[whiteListCache.Length];
+                Array.Copy(whiteListCache, _whiteList, whiteListCache.Length);
+
+                _rawTweets = new RawData(file, _blockSize);
+
+                for (int i = 0; i < _rawTweets.Data.Length; ++i)
+                {
+                    Console.SetCursorPosition(0, 2);
+                    Console.WriteLine("                                                              ");
+                    Console.SetCursorPosition(0, 2);
+                    Console.WriteLine("Discovering tweet \"" + ++_processCount + "\"");
+                    _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
+                    _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _codex));
+                    _tweets.Last().Index(ref _contents, ref _types);
+                }
+
+                if(file.EndOfStream)
+                {
+                    pStage = processStage.LAST;
+                }
+                //preparing files 
+                pStage = _processOutputPtr(pStage);
+
+                //clear these out now they've done their work for the sweep
+                //force GC to clear up unused object
+                _rawTweets.Clear();
+                _tweets.Clear();
+                _tweetObjects.Clear();
+                _contents.Clear();
+                _types.Clear();
+                _clippedTweets.Clear();
+                _clipTwStr.Clear();
+
+            } while (!file.EndOfStream && pStage != processStage.COMPLETE);
 
             if (codexFiles != null)
             {
                 _codex.WriteHisory();
+
                 _codex.WriteHisoryToTable(_outputFilename);
             }
         }
 
         //using the tweet object version of the data
-        private void ProcessOutput_PrototypeList()
+        private processStage ProcessOutput_PrototypeList(processStage stage = processStage.IN_PROGRESS)
         {
-            Console.CursorTop = 4;
-            Console.CursorLeft = 0;
+            Console.SetCursorPosition(0, 3);
             Console.WriteLine("preparing **PROTOTYPE LIST**");
             //process for CSV
             _blackListPtr();
@@ -158,41 +198,52 @@ namespace TweetClip
             outWhiteList.Sort();
 
             File.WriteAllLines(_outputFilename + "_prototype.txt", outWhiteList);
+
+            return processStage.COMPLETE;
         }
 
         //using the tweet object version of the data
-        private void ProcessOutput_CSV()
+        private processStage ProcessOutput_CSV(processStage stage = processStage.IN_PROGRESS)
         {
-            Console.CursorTop = 4;
-            Console.CursorLeft = 0;
-            Console.WriteLine("Packaging tweets as **CSV TABLE** and saving to file");
+            Console.SetCursorPosition(0, 3);
+            Console.WriteLine("Packaging tweets as **CSV TABLE**");
             //process for CSV
             _blackListPtr();
 
             int count = 0;
  
             Dictionary<string, int> rowIndex = new Dictionary<string, int>();
-            
-            //add the header
+
             List<string> table = new List<string>();
             List<string> tableRow = new List<string>();
 
-            for (int j = 0; j < _whiteList.Length; ++j)
-            {
-                tableRow.Add(_whiteList[j]);
-            }
-            tableRow[tableRow.Count-1] = tableRow.Last().TrimEnd(',');
-            table.Add(tableRow.Aggregate((a,b) => a + "," + b));
             
+            //is this is the first run clear out the file
+            if (stage == processStage.FIRST)
+            {
+                //clear the file
+                File.WriteAllText(_outputFilename + "_table.csv", "");
+
+                //add the header
+                for (int j = 0; j < _whiteList.Length; ++j)
+                {
+                    tableRow.Add(_whiteList[j]);
+                }
+                tableRow[tableRow.Count - 1] = tableRow.Last().TrimEnd(',');
+                table.Add(tableRow.Aggregate((a, b) => a + "," + b));
+            }
+
+
             for (int i = 0; i < _tweets.Count; ++i)
             {
                 tableRow = new List<string>();
                 Dictionary<string,string> tw = _tweets[i].Nodes;
                 List<string> twKeys = tw.Keys.ToList();
 
-                Console.CursorLeft = 0;
-                Console.CursorTop = 6;
-                Console.WriteLine("compiling table row \"" + ++count + "\"");
+                Console.SetCursorPosition(0, 5);
+                Console.WriteLine("                                                                   ");
+                Console.SetCursorPosition(0, 5);
+                Console.WriteLine("preparing sweep row \"" + ++count + "/" + _blockSize + "\"");
                 for (int j = 0; j < _whiteList.Length; ++j)
                 {
                     string lookUp = _whiteList[j];
@@ -218,12 +269,18 @@ namespace TweetClip
                 table.Add(tableRow.Aggregate((a, b) => a + "," + b));
             }
 
-            Console.WriteLine("table constructed, saving to file");
             //encode the text with UTF-8 BOM, this means Excel will pick up the encoding
             Encoding utf8WithBom = new UTF8Encoding(true);
-            File.WriteAllLines(_outputFilename + "_table.csv", table, utf8WithBom);
+            File.AppendAllLines(_outputFilename + "_table.csv", table, utf8WithBom);
+
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("                                                              ");
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("sweep written to table");
+
+            return stage;
         }
-        
+
         //process for JSON
         private void ProcessJSON()
         {
@@ -231,9 +288,10 @@ namespace TweetClip
 
             foreach (JObject tweet in _tweetObjects)
             {
-                Console.CursorTop = 4;
-                Console.CursorLeft = 0;
-                Console.WriteLine("Clipping tweet \"" + ++count + "\"");
+                Console.SetCursorPosition(0, 4);
+                Console.WriteLine("                                                              ");
+                Console.SetCursorPosition(0, 4);
+                Console.WriteLine("Clipping sweep tweet \"" + ++count + "/" + _blockSize + "\"");
                 string[] blackList = _blackListPtr();
                 _clippedTweets.Add(ClipTweet(tweet, blackList));
                 //remove all new line
@@ -242,58 +300,106 @@ namespace TweetClip
         }
 
         //using the string version of the data
-        private void ProcessOutput_Array()
+        private processStage ProcessOutput_Array(processStage stage = processStage.IN_PROGRESS)
         {
+            //add the header
+            if (stage == processStage.FIRST)
+            {
+                File.WriteAllText(_outputFilename + "_array.json", "");
+            }
+
             ProcessJSON();
 
-            Console.WriteLine("Packaging tweets as **JSON ARRAY** and saving to file");
-            string file = "";
-            for (int i = 0; i < _clipTwStr.Count; ++i)
+            //concat is too slow
+            List<string> liFile = new List<string>();
+
+            string file = _clipTwStr.Aggregate((a, b) => a + ",\r\n" + b);
+
+            if (stage == processStage.FIRST)
             {
-                file += (_clipTwStr[i] + ",\r\n");
+                file = "[" + file;
             }
-            string leadingInfo = "[";
-            string trailingInfo = "]";
-
-            file = leadingInfo + file.Remove(file.Length - 3) + trailingInfo;
-
+            else if (stage == processStage.LAST)
+            {
+                file = file + "]";
+            }
             
-            File.WriteAllText(_outputFilename + "_array.json", file);
+            File.AppendAllText(_outputFilename + "_array.json", file);
+            
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("                                                                        ");
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("sweep written to file as **JSON ARRAY**");
+
+            return stage;
         }
 
         //using the string version of the data
-        private void ProcessOutput_Elastic()
+        private processStage ProcessOutput_Elastic(processStage stage = processStage.IN_PROGRESS)
         {
             ProcessJSON();
+            StringBuilder sb = new StringBuilder();
 
-            Console.WriteLine("Packaging tweets as **ELASTIC COMPATIBLE JSON COLLECTION** and saving to file");
+            Console.WriteLine("Packaging tweets as **ELK COMPATIBLE JSON**");
             string file = "";
-            for (int i = 0; i < _clipTwStr.Count; ++i)
+
+            int count = _processCount - _blockSize;
+            file = _clipTwStr.Aggregate((a, b) => a + "\r\n{ \"index\" : { \"_id\" : \"" + ++count + "\" } }\r\n" + b);
+
+            //is this is the first run clear out the file
+            if (stage == processStage.FIRST)
             {
-                file += ("{ \"index\" : { \"_id\" : \"" + i + "\" } }\r\n" + _clipTwStr[i] + "\r\n");
+                File.WriteAllText(_outputFilename + "_ELK.json", "");
+                stage = processStage.IN_PROGRESS;
             }
+
+            //add necessary closing newline
+            string trailingInfo = "";
+            if (stage == processStage.LAST)
+            {
+                trailingInfo = "\n";
+            }
+
+            //add first and last metadata blocks
+            sb.Append("{ \"index\" : { \"_id\" : \"" + (_processCount - _blockSize) + "\" } }\r\n" + file + "{ \"index\" : { \"_id\" : \"" + (_processCount - 1) + "\" } }\r\n" + trailingInfo);
             
-            string trailingInfo = "\n";
+            File.AppendAllText(_outputFilename + "_ELK.json", sb.ToString());
+            sb.Clear();
 
-            file = file.Remove(file.Length - 3) + trailingInfo;
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("                                                              ");
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("sweep written to file as **ELK COMPATIBLE JSON**");
 
-
-            File.WriteAllText(_outputFilename + "_ELK.json", file);
+            return stage;
         }
 
         //using the string version of the data
-        private void ProcessOutput_RawJSON()
+        private processStage ProcessOutput_RawJSON(processStage stage = processStage.IN_PROGRESS)
         {
             ProcessJSON();
 
             Console.WriteLine("Packaging tweets as **RAW JSON** and saving to file");
+
+            //concat is too slow - use aggrigate
             string file = "";
-            for (int i = 0; i < _clipTwStr.Count; ++i)
+            file = _clipTwStr.Aggregate((a, b) => a + "\r\n" + b);
+
+            //is this is the first run clear out the file
+            if (stage == processStage.FIRST)
             {
-                file += (_clipTwStr[i] + "\r\n");
+                File.WriteAllText(_outputFilename + "_raw.json", file);
+                stage = processStage.IN_PROGRESS;
             }
 
-            File.WriteAllText(_outputFilename + "_raw.json", file);
+            File.AppendAllText(_outputFilename + "_raw.json", file);
+
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("                                                              ");
+            Console.SetCursorPosition(0, 4);
+            Console.WriteLine("sweep written to file as **RAW JSON**");
+
+            return stage;
         }
         //make a composite list from the whitelist that we'll use to prune the copied tweet
         
@@ -420,6 +526,9 @@ namespace TweetClip
         {
             List<string> revisedWhitelist = new List<string>();
 
+            Console.SetCursorPosition(0, 3);
+            Console.WriteLine("                                                              ");
+            Console.SetCursorPosition(0, 3);
             Console.WriteLine("searcing for matches using **Explicit** algorithm");
             List<string> contentArray = _contents.Keys.ToList();
             for(int i = 0; i < _whiteList.Length; ++i)
@@ -557,23 +666,49 @@ namespace TweetClip
         }
 
         public void IndexMode (string[] dataFiles, modeFlags mode)
-        {           
-            _rawTweets = new RawData(dataFiles[0]);
-
-            //---------------------    map all contents, send to file and exit     -------------------------
-
-            //explore all tweets, establish content nodes and output results in index file and catalogue files
-            int count = 0;
-            foreach (string tw in _rawTweets.Data)
+        {
+            
+            StreamReader file = null;
+            try
             {
-                Console.CursorTop = 4;
-                Console.CursorLeft = 0;
-                Console.WriteLine("Exploring tweet \"" + ++count + "\"");
-                JObject tweetObject = JObject.Parse(tw);
-                _tweets.Add(new Tweet(tweetObject, mode));
-                _tweets.Last<Tweet>().Index(ref _contents, ref _types);
+                file = File.OpenText(dataFiles[0]);
+            }
+            catch (Exception e)
+            {
+                Console.SetCursorPosition(0,0);
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.WriteLine("Tweetclip - run failed");
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.SetCursorPosition(0, 1);
+                Console.WriteLine("Can't read the text in this file");
+                Console.WriteLine("Please check the file is available and not open");
             }
 
+            int count = 0;
+
+            do {
+                _rawTweets = new RawData(file, _blockSize);
+
+                //---------------------    map all contents, send to file and exit     -------------------------
+
+                //explore all tweets, establish content nodes and output results in index file and catalogue files
+                
+                foreach (string tw in _rawTweets.Data)
+                {
+                    Console.SetCursorPosition(0, 3);
+                    Console.WriteLine("Exploring tweet \"" + ++count + "\"");
+
+                    JObject tweetObject = JObject.Parse(tw);
+                    _tweets.Add(new Tweet(tweetObject, mode));
+                    _tweets.Last<Tweet>().Index(ref _contents, ref _types);
+                }
+
+                //force GC to clear up unused object
+                _rawTweets.Clear();
+                _tweets.Clear();
+            } while (!file.EndOfStream);
             //this creates a list of element ignoreing array contents
             List<string> orderedPathList = new List<string>();
 
@@ -582,8 +717,8 @@ namespace TweetClip
             pathList.Sort();
             //optimisation
             string[] pathArray = pathList.ToArray();
-            
-            for(int i = 0; i < pathArray.Length; ++i)
+
+            for (int i = 0; i < pathArray.Length; ++i)
             {
                 //clean the paths of array indices
                 string[] pathSegments = pathArray[i].Split('.');
@@ -607,19 +742,29 @@ namespace TweetClip
             }
             //save them cleaned paths to file
             File.WriteAllLines("Data\\index.txt", orderedPathList);
-
-            Console.WriteLine("Exploration complete!\nIndex file produced");
+            Console.SetCursorPosition(0, 3);
+            Console.WriteLine("                                             ");
+            Console.SetCursorPosition(0, 3);
+            Console.WriteLine("Exploration complete!");
+            Console.WriteLine("Index file created");
             //this generates a complete list of data fields
             List<string> contentList = new List<string>();
             contentList.Add("Node,Type,Frequency");
-            
+
             //
             foreach (string index in pathList)
             {
-                contentList.Add(index + "," + _types[index] + "," + _contents[index]);   
+                contentList.Add(index + "," + _types[index] + "," + _contents[index]);
             }
             File.WriteAllLines("Data\\catalogue.csv", contentList.ToArray<string>());
-            Console.WriteLine("Catalogue file produced");
+            Console.WriteLine("Catalogue file created");
+
+            Console.SetCursorPosition(0, 0);
+            Console.BackgroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.WriteLine("Tweetclip - run success");
+
+            int fff = 0;
         }
 
         MakeBlackList _blackListPtr;
@@ -635,5 +780,7 @@ namespace TweetClip
         string[] _whiteList;
         List<string> _clipTwStr;
         string _outputFilename;
+        int _blockSize;
+        int _processCount;
     }
 }

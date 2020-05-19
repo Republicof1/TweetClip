@@ -14,9 +14,22 @@ namespace TweetClip
         public RawData(string data_filename)
         {
             _fileName = data_filename;
+            List<string> dataList = new List<string>();
 
             try {
-                _data = File.ReadAllLines(_fileName);
+                //_data = File.ReadAllLines(_fileName);
+
+                StreamReader sr = File.OpenText(_fileName);
+
+                for (int i = 0; i < 10000; ++i)
+                {
+                    if (!sr.EndOfStream)
+                    {
+                        dataList.Add(sr.ReadLine());
+                    }
+                }
+                _data = dataList.ToArray();
+                int f = 0;
             }
             catch (Exception e)
             {
@@ -24,9 +37,28 @@ namespace TweetClip
             }
         }
 
+        public RawData(StreamReader file, int blocksize)
+        {
+            List<string> dataList = new List<string>();
+
+            for (int i = 0; i < blocksize; ++i)
+                {
+                    if (!file.EndOfStream)
+                    {
+                        dataList.Add(file.ReadLine());
+                    }
+                }
+                _data = dataList.ToArray();
+        }
+
         public string[] Data
         {
             get { return _data; }        
+        }
+
+        public void Clear()
+        {
+            _data = null;
         }
 
         string _fileName;
