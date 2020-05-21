@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 1.8.4
+Version 2.0.0
 ==============================
 
 ][Description][
@@ -18,6 +18,8 @@ Version 1.8.4
 TweetClip takes json and clips it down to the fields you are intersted while maintaining relevant structures.
 
 It was built to support work on twitter data, but will work with any json data.
+
+It can handle very large data files (200,000+ tweets) on average this will require at least 1gb working memory.
 
 ==============================
 
@@ -120,5 +122,5 @@ root
 
 Jobs left to do:
 
-batch job
+Evaluate with users
 

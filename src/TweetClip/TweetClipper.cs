@@ -231,6 +231,7 @@ namespace TweetClip
                 }
                 tableRow[tableRow.Count - 1] = tableRow.Last().TrimEnd(',');
                 table.Add(tableRow.Aggregate((a, b) => a + "," + b));
+                stage = processStage.IN_PROGRESS;
             }
 
 
@@ -317,13 +318,18 @@ namespace TweetClip
 
             if (stage == processStage.FIRST)
             {
-                file = "[" + file;
+                file = "[" + file + ",\r\n";
+                stage = processStage.IN_PROGRESS;
             }
             else if (stage == processStage.LAST)
             {
                 file = file + "]";
             }
-            
+            else if (stage == processStage.IN_PROGRESS)
+            {
+                file = file + ",\r\n";
+            }
+
             File.AppendAllText(_outputFilename + "_array.json", file);
             
             Console.SetCursorPosition(0, 4);
