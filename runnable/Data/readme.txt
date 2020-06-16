@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 2.0.0
+Version 2.1.0
 ==============================
 
 ][Description][
@@ -49,7 +49,7 @@ root
 -t | tableOutput          | outputs a CSV instead of json output 							| OPTIONAL
 -p | prototypeOutput      | outputs a list of the all search results based on the current clip mode			| OPTIONAL
 -x | symbolReplacement    | all names are replace in the output - symbols are randomly EACH time			| OPTIONAL
--r | reuseSymbols         | maintain a history resource if present							| OPTIONAL
+-r | refreshSymbols       | clean and restart the history resource if present						| OPTIONAL
 
 =============================
 

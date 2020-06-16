@@ -12,6 +12,7 @@ namespace TweetClip
 {
     class Program
     {
+        public static string VERSION = "v2.1.0";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 
@@ -92,6 +93,7 @@ namespace TweetClip
             string outputFilename = "";
             TweetClipper tc = new TweetClipper();
             bool symbolise = false;
+            bool datafileAsOutput = false;
 
             //get the target file from arguments (Options)
             modeFlags cMode = modeFlags.EXPLICIT;
@@ -113,10 +115,8 @@ namespace TweetClip
                     }
                     else
                     {
-                        Console.SetCursorPosition(0, 2);
-                        Console.WriteLine("using datafile name as output name");
+                        datafileAsOutput = true;
                         outputFilename = opts.DataFilePath;
-                        Console.SetCursorPosition(0, 0);
                     }
                     if (opts.WideMode)
                     {
@@ -171,47 +171,96 @@ namespace TweetClip
                 codexFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "full-codex.codex");
             }
 
-            Console.Clear();
             Console.BackgroundColor = ConsoleColor.Cyan;
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write("Tweetclip - running");
+            Console.WriteLine(">> Tweetclip - " + VERSION + " <<");
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.ForegroundColor = ConsoleColor.White;
+
+            if(datafileAsOutput)
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine("using datafile name as output name");
+                Console.ForegroundColor = ConsoleColor.White;
+            }
 
             //index mode
             if (dataFiles != null && configFiles == null)
             {
+                if (dataFiles.Length == 0)
+                {
+                    Parser.Default.ParseArguments<Options>(args)
+                   .WithParsed<Options>(opts =>
+                   {
+                       Console.BackgroundColor = ConsoleColor.Red;
+                       Console.ForegroundColor = ConsoleColor.Black;
+                       Console.WriteLine("Tweetclip - run failed");
+                       Console.BackgroundColor = ConsoleColor.Black;
+                       Console.ForegroundColor = ConsoleColor.Red;
+                       Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found!");
+                       Console.WriteLine("Please check filepath is correct before running again");
+                       Console.BackgroundColor = ConsoleColor.Black;
+                       Console.ForegroundColor = ConsoleColor.White;
+                   });
+                   return;
+                }
+
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("Index mode started: Prcessing \"" + dataFiles[0] + "\"");
                 Console.BackgroundColor = ConsoleColor.Black;
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.SetCursorPosition(0, 1);
-                Console.Write("Index mode started: Prcessing \"" + dataFiles[0] + "\"");
 
                 tc.IndexMode(dataFiles, modeFlags.INDEX);
+
+                Console.BackgroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.WriteLine("Tweetclip - index run success!");
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
             }
             //clip mode
             else if (dataFiles != null && configFiles != null)
             {
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.SetCursorPosition(0, 1);
-                Console.Write("Clipping mode started: Processing \"" + dataFiles[0] + "\"");
-                tc.ClipMode(dataFiles, configFiles, codexFiles, outputFilename, cMode, oMode);
-            }
-            else
-            {
-                Parser.Default.ParseArguments<Options>(args)
-               .WithParsed<Options>(opts =>
-               {
-                   Console.SetCursorPosition(0, 0);
-                   Console.BackgroundColor = ConsoleColor.Red;
-                   Console.ForegroundColor = ConsoleColor.Black;
-                   Console.WriteLine("Tweetclip - run failed");
-                   Console.BackgroundColor = ConsoleColor.Black;
-                   Console.ForegroundColor = ConsoleColor.Red;
-                   Console.SetCursorPosition(0, 1);
-                   Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found!");
-                   Console.WriteLine("Please check filepath is correct before running again");
-               });
-            }
+                if (dataFiles.Length == 0 || configFiles.Length == 0)
+                {
+                    Parser.Default.ParseArguments<Options>(args)
+                   .WithParsed<Options>(opts =>
+                   {
+                       Console.BackgroundColor = ConsoleColor.Red;
+                       Console.ForegroundColor = ConsoleColor.Black;
+                       Console.WriteLine("Tweetclip - run failed");
+                       Console.BackgroundColor = ConsoleColor.Black;
+                       Console.ForegroundColor = ConsoleColor.Red;
+                       if (configFiles.Length == 0)
+                       {
+                           Console.WriteLine("file \"" + opts.ConfigFilePath + "\" could not be found!");
+                       }
 
+                       if (dataFiles.Length == 0)
+                       {
+                           Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found!");
+                       }
+                       Console.WriteLine("Please check filepath(s) before running again");
+                       Console.BackgroundColor = ConsoleColor.Black;
+                       Console.ForegroundColor = ConsoleColor.White;
+                   });
+                   return;
+                }
+
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.WriteLine("Clipping mode started: Processing \"" + dataFiles[0] + "\"");
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+                tc.ClipMode(dataFiles, configFiles, codexFiles, outputFilename, cMode, oMode);
+
+                Console.BackgroundColor = ConsoleColor.Green;
+                Console.ForegroundColor = ConsoleColor.Black;
+                Console.WriteLine("Tweetclip - clipping run success!");
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
     }
 }
