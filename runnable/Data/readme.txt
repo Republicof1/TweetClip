@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 2.2.0
+Version 2.2.0 "Topaz"
 ==============================
 
 ][Description][
