@@ -12,7 +12,7 @@ namespace TweetClip
 {
     class Program
     {
-        public static string VERSION = "v2.1.0";
+        public static string VERSION = "v2.2.0; \"Topaz\"";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 
@@ -104,7 +104,22 @@ namespace TweetClip
                 {
                     string directory = Directory.GetCurrentDirectory();
 
-                    dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath);
+                    if (opts.DataFilePath.Contains("json"))
+                    {
+                        dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath);
+                    }
+                    else
+                    {
+                        if (opts.DataFilePath.Last() == '\\' || opts.DataFilePath.Last() == '/')
+                        {
+                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "*.json");
+                        }
+                        else
+                        {
+                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "\\*.json");
+                        }
+                    }                   
+
                     if (opts.ConfigFilePath != null)
                     {
                         configFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.ConfigFilePath);

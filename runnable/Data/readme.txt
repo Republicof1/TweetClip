@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 2.1.0
+Version 2.2.0
 ==============================
 
 ][Description][
@@ -20,6 +20,8 @@ TweetClip takes json and clips it down to the fields you are intersted while mai
 It was built to support work on twitter data, but will work with any json data.
 
 It can handle very large data files (200,000+ tweets) on average this will require at least 1gb working memory.
+
+It can handle multiple data files per run - must all use the same clipping mode and config file
 
 ==============================
 
@@ -38,7 +40,7 @@ root
 
 ][Arguments][
 
--d | dataFilePath         | Relative path to the data json 								| REQUIRED (when supplied alone triggers Index mode)
+-d | dataFilePath         | Relative path to the data 									| REQUIRED (when supplied alone triggers Index mode)
 -c | configFilePath       | Relative path to the config file 								| OPTIONAL (when present triggers Clipping mode)
 -o | outputFilename	  | Desired forename product output files							| OPTIONAL (when not present, dataFilename is used)
 -e | explicitMatching     | explicit clipping mode 									| OPTIONAL (default matching algorithm)
@@ -57,8 +59,11 @@ root
 
 - - index mode - -
 
-   \\input files: {data}.json//
-    {data}.json contains your json data
+   \\input files: {data}//
+    All data must be input as a standard twitter .json collection; 1 line / tweet
+    {data} can indicate an explicit file e.g. {data}.json - where this the case tweet clip will use only the specified file as source data
+    {data} can also indicate a folder e.g. {data}/ - in this case all files with the .json extension within the specified folder will be used as source data
+    in each case the program will close after the attempted processing of all target data
 
    This mode describes the structure of the supplied file
    
@@ -73,7 +78,10 @@ root
 - - clip mode - -
      
    \\input files: {data}.json, {cofig}.txt//
-    {data}.json contains your json data
+    All data must be input as a standard twitter .json collection; 1 line / tweet
+    {data} can indicate an explicit file e.g. {data}.json - where this the case tweet clip will use only the specified file as source data
+    {data} can also indicate a folder e.g. {data}/ - in this case all files with the .json extension within the specified folder will be used as source data
+    in each case the program will close after the attempted processing of all target data
     {config}.json this file contains a whitelist of fields or patterns that you wish to be present in your export, 1 symbol per line; Fields can be copied directly from index.txt.
 
    //output files: catalogue.csv, index.txt\\

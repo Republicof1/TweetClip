@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +9,6 @@ using CommandLine;
 using Newtonsoft.Json.Linq;
 using static TweetClip.Program;
 
-//TODO: More capable handling of arrays needed to manage - BLACKLIST 
 namespace TweetClip
 {
     class TweetClipper
@@ -110,73 +109,80 @@ namespace TweetClip
             }
 
             StreamReader file = null;
-            try
-            {
-                file = File.OpenText(dataFiles[0]);
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Can't read the text in this file");
-                Console.ForegroundColor = ConsoleColor.White;
-            }
 
-            //---------------------    map all contents, truncate, pseudonomise, and serialise and send to file    -------------------------
-
-            //map data and generate inital descriptive output
-            string[] whiteListCache = File.ReadAllLines(configFiles[0]);
-
-            _processCount = 0;
-            processStage pStage = processStage.FIRST;
+            int fileIndex = 0;
 
             do
             {
-                _whiteList = new string[whiteListCache.Length];
-                Array.Copy(whiteListCache, _whiteList, whiteListCache.Length);
-
-                _rawTweets = new RawData(file, _blockSize);
-
-                for (int i = 0; i < _rawTweets.Data.Length; ++i)
+                try
                 {
-                    Console.CursorLeft = 0;
-                    Console.Write("Discovering tweet \"" + ++_processCount + "\"");
-
-                    _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
-                    _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _codex));
-                    _tweets.Last().Index(ref _contents, ref _types);
+                    Console.WriteLine("\nClipping " + dataFiles[fileIndex]);
+                    file = File.OpenText(dataFiles[fileIndex]);
                 }
-                Console.SetCursorPosition(0, Console.CursorTop + 1);
-                
-                //preparing files 
-                pStage = _processOutputPtr(pStage);
-
-                if (file.EndOfStream)
+                catch (Exception e)
                 {
-                    pStage = processStage.LAST;
-                    
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Can't read the text in this file");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
-                
-                //clear these out now they've done their work for the sweep
-                //force GC to clear up unused object
-                _rawTweets.Clear();
-                _tweets.Clear();
-                _tweetObjects.Clear();
-                _contents.Clear();
-                _types.Clear();
-                _clippedTweets.Clear();
-                _clipTwStr.Clear();
 
-            } while (!file.EndOfStream && pStage != processStage.COMPLETE);
+                //---------------------    map all contents, truncate, pseudonomise, and serialise and send to file    -------------------------
 
-            Console.CursorTop = Console.CursorTop + 1;
-            Console.CursorLeft = 0;
+                //map data and generate inital descriptive output
+                string[] whiteListCache = File.ReadAllLines(configFiles[0]);
 
-            if (codexFiles != null)
-            {
-                _codex.WriteHisory();
+                _processCount = 0;
+                processStage pStage = processStage.FIRST;
 
-                _codex.WriteHisoryToTable(_outputFilename);
-            }
+                do
+                {
+                    _whiteList = new string[whiteListCache.Length];
+                    Array.Copy(whiteListCache, _whiteList, whiteListCache.Length);
+
+                    _rawTweets = new RawData(file, _blockSize);
+
+                    for (int i = 0; i < _rawTweets.Data.Length; ++i)
+                    {
+                        Console.CursorLeft = 0;
+                        Console.Write("Discovering tweet \"" + ++_processCount + "\"");
+
+                        _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
+                        _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _codex));
+                        _tweets.Last().Index(ref _contents, ref _types);
+                    }
+                    Console.SetCursorPosition(0, Console.CursorTop + 1);
+
+                    //preparing files 
+                    pStage = _processOutputPtr(pStage);
+
+                    if (file.EndOfStream)
+                    {
+                        pStage = processStage.LAST;
+
+                    }
+
+                    //clear these out now they've done their work for the sweep
+                    //force GC to clear up unused object
+                    _rawTweets.Clear();
+                    _tweets.Clear();
+                    _tweetObjects.Clear();
+                    _contents.Clear();
+                    _types.Clear();
+                    _clippedTweets.Clear();
+                    _clipTwStr.Clear();
+
+                } while (!file.EndOfStream && pStage != processStage.COMPLETE);
+
+                Console.CursorTop = Console.CursorTop + 1;
+                Console.CursorLeft = 0;
+
+                if (codexFiles != null)
+                {
+                    _codex.WriteHisory();
+
+                    _codex.WriteHisoryToTable(_outputFilename);
+                }
+            } while (++fileIndex<dataFiles.Length);
         }
 
         //using the tweet object version of the data
@@ -675,46 +681,55 @@ namespace TweetClip
         {
             
             StreamReader file = null;
-            try
+
+            int fileIndex = 0;
+
+            //open file, close file, if files remain { open file }
+            do
             {
-                file = File.OpenText(dataFiles[0]);
-            }
-            catch (Exception e)
-            {
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.ForegroundColor = ConsoleColor.Black;
-                Console.WriteLine("Tweetclip - run failed");
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Can't read the text in this file");
-                Console.WriteLine("Please check the file is available and not open");
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.White; ;
-            }
-
-            int count = 0;
-
-            do {
-                _rawTweets = new RawData(file, _blockSize);
-
-                //---------------------    map all contents, send to file and exit     -------------------------
-
-                //explore all tweets, establish content nodes and output results in index file and catalogue files
-                
-                foreach (string tw in _rawTweets.Data)
+                try
                 {
-                    Console.CursorLeft = 0;
-                    Console.Write("Exploring tweet \"" + ++count + "\"");
-
-                    JObject tweetObject = JObject.Parse(tw);
-                    _tweets.Add(new Tweet(tweetObject, mode));
-                    _tweets.Last<Tweet>().Index(ref _contents, ref _types);
+                    Console.WriteLine("\nIndexing " + dataFiles[fileIndex]);
+                    file = File.OpenText(dataFiles[fileIndex]);
+                }
+                catch (Exception e)
+                {
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.WriteLine("Tweetclip - run failed");
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Can't read the text in this file");
+                    Console.WriteLine("Please check the file is available and not open");
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.White; ;
                 }
 
-                //force GC to clear up unused object
-                _rawTweets.Clear();
-                _tweets.Clear();
-            } while (!file.EndOfStream);
+                int count = 0;
+
+                do
+                {
+                    _rawTweets = new RawData(file, _blockSize);
+
+                    //---------------------    map all contents, send to file and exit     -------------------------
+
+                    //explore all tweets, establish content nodes and output results in index file and catalogue files
+
+                    foreach (string tw in _rawTweets.Data)
+                    {
+                        Console.CursorLeft = 0;
+                        Console.Write("Exploring tweet \"" + ++count + "\"");
+
+                        JObject tweetObject = JObject.Parse(tw);
+                        _tweets.Add(new Tweet(tweetObject, mode));
+                        _tweets.Last<Tweet>().Index(ref _contents, ref _types);
+                    }
+
+                    //force GC to clear up unused object
+                    _rawTweets.Clear();
+                    _tweets.Clear();
+                } while (!file.EndOfStream);
+            } while (++fileIndex < dataFiles.Length);
 
             Console.SetCursorPosition(0, Console.CursorTop + 1);
             //this creates a list of element ignoreing array contents
