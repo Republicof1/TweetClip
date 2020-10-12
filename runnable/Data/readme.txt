@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 2.2.0 "Topaz"
+Version 2.3.0 "Gypsum"
 ==============================
 
 ][Description][
@@ -50,7 +50,7 @@ root
 -k | elasticsearch	  | outputs newline delineated JSON with metadata sufficent to bulk import into the ELK stack   | OPTIONAL
 -t | tableOutput          | outputs a CSV instead of json output 							| OPTIONAL
 -p | prototypeOutput      | outputs a list of the all search results based on the current clip mode			| OPTIONAL
--x | symbolReplacement    | all names are replace in the output - symbols are randomly EACH time			| OPTIONAL
+-x | symbolReplacement    | all usernames are replace in the output - symbols are randomly EACH time			| OPTIONAL
 -r | refreshSymbols       | clean and restart the history resource if present						| OPTIONAL
 
 =============================

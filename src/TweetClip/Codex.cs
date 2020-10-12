@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace TweetClip
 {
@@ -24,7 +26,7 @@ namespace TweetClip
             _proxyPairs = new Dictionary<string, string>();
             _suppliedProxys = new Dictionary<string, string>();
 
-            
+
             //get the headers out of the codex
             List<string> listLimitSymbols = _rawCodex.FindAll(delegate (string symbol)
                 {
@@ -84,7 +86,7 @@ namespace TweetClip
                 handle = handle.Replace(" ", "-");
             }
 
-            if (handle.Contains("@"))
+            if (handle.Length > 1 && (handle[0] == '@' || handle[1] == '@'))
             {
                 //handle the rare case of inlines possessive appostrphe
                 if (handle.Contains("'s"))
@@ -99,10 +101,28 @@ namespace TweetClip
                     handle = handle.Replace("’s", "");
                 }
 
-                //trim any trailing non alphanumeric characters to avoid hanndle duplication
-                //twitter's mysterious use of LRI and PDI characters is also handled here - '\u2066', '\u2069'
-                handle = handle.TrimEnd(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
-                handle = handle.TrimStart(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
+                //handle the very rare case of embedded newlines or amp
+                if (handle.Contains('\r') || handle.Contains('&'))
+                {
+                    string[] splitHandle = handle.Split(new char[] { '\r', '&' });
+                    for (int i = 0; i < splitHandle.Length; ++i)
+                    {
+                        //keep the seciont that contains the handle signifier
+                        if (splitHandle[i].Contains('@'))
+                        {
+                            handle = splitHandle[i];
+                        }
+                    }
+                }
+
+                //remove all other handle incompatible characrers 
+                Regex rgx = new Regex("[^a-zA-Z0-9_@]");
+                handle = rgx.Replace(handle, "");
+
+                ////trim any trailing non alphanumeric characters to avoid hanndle duplication
+                ////twitter's mysterious use of LRI and PDI characters is also handled here - '\u2066', '\u2069'
+                //handle = handle.TrimEnd(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
+                //handle = handle.TrimStart(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
             }
 
             //if we already have a proxy for this, use that
@@ -181,7 +201,6 @@ namespace TweetClip
             File.WriteAllLines("codexHistory.cdxh", writeFile.ToArray());
         }
 
-
         //read in and clear the current history file
         private void ReadHisory()
         {
@@ -192,6 +211,7 @@ namespace TweetClip
             {
                 //split the pair and add it
                 string[] pair = readFile[i].Split(new string[] { "|@|" }, StringSplitOptions.None);
+                //
                 //add to a collection of items that have been ingested
                 _suppliedProxys.Add(pair[0],pair[1]);
                 //add to the master proxy index
