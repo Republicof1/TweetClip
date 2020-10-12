@@ -12,7 +12,7 @@ namespace TweetClip
 {
     class Program
     {
-        public static string VERSION = "v2.3.0; \"Gypsum\"";
+        public static string VERSION = "v2.4.0; \"Tanzanite\"";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 

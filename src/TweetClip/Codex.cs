@@ -78,15 +78,20 @@ namespace TweetClip
             ReadHisory();
         }
 
-        public string Proxy(string handle)
+        public string Proxy(string input)
         {
+            
+
             //often true with this is a screenName
-            if (handle.Contains(" "))
+            //GYPSUM-> review if this block is needed
+            if (input.Contains(" "))
             {
-                handle = handle.Replace(" ", "-");
+                input = input.Replace(" ", "-");
             }
 
-            if (handle.Length > 1 && (handle[0] == '@' || handle[1] == '@'))
+            string handle = input;
+
+            if (handle.Length > 1 && (handle[0] == '@' || (handle[0] == '\u2066' || handle[0] == '\u2069') &&  handle[1] == '@'))
             {
                 //handle the rare case of inlines possessive appostrphe
                 if (handle.Contains("'s"))
@@ -125,23 +130,51 @@ namespace TweetClip
                 //handle = handle.TrimStart(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
             }
 
+            
+            string output = "";
+
             //if we already have a proxy for this, use that
             if (_proxyPairs.Keys.Contains(handle))
             {
-                return _proxyPairs[handle];
+                //we need to replace the filtered characters
+                if (handle.Length > 0)
+                {
+                    if (handle[0] == '@' && handle.Length > 1)
+                    {
+                        output = input.Replace(handle.Substring(1, handle.Length - 1), _proxyPairs[handle]);
+                    }
+
+                    else
+                    {
+                        output = input.Replace(handle, _proxyPairs[handle]);
+                    }
+                }
             }
             //if not allocate a new one - if were over bounds, refresh the list of proxies
             else
             {
-                
-                if(_currentIndex >= _replacementList.Count())
+
+                if (_currentIndex >= _replacementList.Count())
                 {
                     RefreshProxyList();
                 }
                 _proxyPairs.Add(handle, _replacementList[_currentIndex]);
-                return _replacementList[_currentIndex++];
 
-            }
+
+                if (handle.Length > 0)
+                {
+                    if (handle[0] == '@' && handle.Length > 1)
+                    {
+                        output = input.Replace(handle.Substring(1, handle.Length - 1), _replacementList[_currentIndex++]);
+                    }
+
+                    else
+                    {
+                        output = input.Replace(handle, _replacementList[_currentIndex++]);
+                    }
+                }
+            }            
+            return output;
         }
 
         //if we run our of proxy names, then make some more
