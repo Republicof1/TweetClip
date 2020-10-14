@@ -17,8 +17,6 @@ namespace TweetClip
             List<string> dataList = new List<string>();
 
             try {
-                //_data = File.ReadAllLines(_fileName);
-
                 StreamReader sr = File.OpenText(_fileName);
 
                 for (int i = 0; i < 10000; ++i)

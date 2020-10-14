@@ -12,7 +12,7 @@ namespace TweetClip
 {
     class Program
     {
-        public static string VERSION = "v2.4.0; \"Tanzanite\"";
+        public static string VERSION = "v2.5.0; \"Obsidian\"";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 
@@ -54,9 +54,6 @@ namespace TweetClip
 
             [Option('r', "RefreshSymbols", Required = false, HelpText = "if present, refreshes the symbol history meaining before running")]
             public bool RefreshSymbols { get; set; }
-
-            //[Option('r', "ReuseSymbols", Required = false, HelpText = "if present, reuses the symbol history from the previous run")]
-            //public bool ReuseSymbols { get; set; }
         }
 
         public enum modeFlags
@@ -90,6 +87,7 @@ namespace TweetClip
             string[] dataFiles = null;
             string[] configFiles = null;
             string[] codexFiles = null;
+            string[] exclusionList = null; //this list contains elements that should not be exported even when requested when -x symbolisation is enabled
             string outputFilename = "";
             TweetClipper tc = new TweetClipper();
             bool symbolise = false;
@@ -173,17 +171,13 @@ namespace TweetClip
                         File.WriteAllLines("codexHistory.cdxh", new string[] { });
                     }
 
-                    //if (!opts.ReuseSymbols)
-                    //{
-                    //    File.WriteAllLines("codexHistory.cdxh", new string[] { });
-                    //}
-
                     symbolise = opts.Symbolise;
                 });
 
             if (symbolise)
             {
                 codexFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "full-codex.codex");
+                exclusionList = Directory.GetFiles(Directory.GetCurrentDirectory(), "exclusionFields.excf");
             }
 
             Console.BackgroundColor = ConsoleColor.Cyan;
@@ -268,7 +262,7 @@ namespace TweetClip
                 Console.WriteLine("Clipping mode started: Processing \"" + dataFiles[0] + "\"");
                 Console.BackgroundColor = ConsoleColor.Black;
                 Console.ForegroundColor = ConsoleColor.White;
-                tc.ClipMode(dataFiles, configFiles, codexFiles, outputFilename, cMode, oMode);
+                tc.ClipMode(dataFiles, configFiles, codexFiles, exclusionList, outputFilename, cMode, oMode);
 
                 Console.BackgroundColor = ConsoleColor.Green;
                 Console.ForegroundColor = ConsoleColor.Black;

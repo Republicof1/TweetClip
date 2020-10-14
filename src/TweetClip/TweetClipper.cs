@@ -21,6 +21,7 @@ namespace TweetClip
             _contents = new Dictionary<string, int>();
             _types = new Dictionary<string, string>();
             _clipTwStr = new List<string>();
+            _anonymousExclusionList = new List<string>();
             _rawTweets = null;
             _whiteList = null;
             _blackListPtr = null;
@@ -35,7 +36,7 @@ namespace TweetClip
         public delegate string[] MakeBlackList();
         public delegate processStage ProcessOutput(processStage stage);
 
-        public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, string outFilename, modeFlags mode, outputFlags output)
+        public void ClipMode (string[] dataFiles, string[] configFiles, string[] codexFiles, string[] exclusionList, string outFilename, modeFlags mode, outputFlags output)
         {
             _outputFilename = OUTPUT_FOLDER + outFilename;
 
@@ -108,6 +109,15 @@ namespace TweetClip
                 _codex = new Codex(File.ReadAllLines(codexFiles[0]));
             }
 
+            if (exclusionList != null)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Loading exclusion list");
+                Console.ForegroundColor = ConsoleColor.White;
+
+                _anonymousExclusionList = File.ReadAllLines(exclusionList[0]).ToList();
+            }
+
             StreamReader file = null;
 
             int fileIndex = 0;
@@ -147,19 +157,21 @@ namespace TweetClip
                         Console.Write("Discovering tweet \"" + ++_processCount + "\"");
 
                         _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
-                        _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _codex));
+                        _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _anonymousExclusionList, _codex));
                         _tweets.Last().Index(ref _contents, ref _types);
                     }
                     Console.SetCursorPosition(0, Console.CursorTop + 1);
 
                     //preparing files 
-                    pStage = _processOutputPtr(pStage);
-
                     if (file.EndOfStream)
                     {
                         pStage = processStage.LAST;
 
                     }
+
+                    pStage = _processOutputPtr(pStage);
+
+                    
 
                     //clear these out now they've done their work for the sweep
                     //force GC to clear up unused object
@@ -328,21 +340,27 @@ namespace TweetClip
 
             string file = _clipTwStr.Aggregate((a, b) => a + ",\r\n" + b);
 
-            if (stage == processStage.FIRST)
+            StringBuilder sb = new StringBuilder();
+
+            switch (stage)
             {
-                file = "[" + file + ",\r\n";
-                stage = processStage.IN_PROGRESS;
-            }
-            else if (stage == processStage.LAST)
-            {
-                file = file + "]";
-            }
-            else if (stage == processStage.IN_PROGRESS)
-            {
-                file = file + ",\r\n";
+                case processStage.FIRST:
+                    sb.Append("[" + file + ",\r\n");
+                    stage = processStage.IN_PROGRESS;
+                    break;
+                case processStage.IN_PROGRESS:
+                    sb.Append(file + ",\r\n");
+                    break;
+                case processStage.LAST:
+                    sb.Append(file + "]");
+                    break;
+                default:
+                    Console.WriteLine("Array write state inconsistent - If this issue persists contact developer");
+                    break;
             }
 
-            File.AppendAllText(_outputFilename + "_array.json", file);
+            Console.WriteLine("packaging tweets as **JSON ARRAY** and saving to file");
+            File.AppendAllText(_outputFilename + "_array.json", sb.ToString());
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("sweep written to file as **JSON ARRAY**");
@@ -793,6 +811,7 @@ namespace TweetClip
 
         RawData _rawTweets;
         Codex _codex;
+        List<string> _anonymousExclusionList;
         List<Tweet> _tweets;
         List<JObject> _clippedTweets;
         Dictionary<string, int> _contents;

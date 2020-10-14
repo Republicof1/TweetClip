@@ -80,19 +80,10 @@ namespace TweetClip
 
         public string Proxy(string input)
         {
-            
-
-            //often true with this is a screenName
-            //GYPSUM-> review if this block is needed
-            if (input.Contains(" "))
-            {
-                input = input.Replace(" ", "-");
-            }
-
             string handle = input;
 
-            if (handle.Length > 1 && (handle[0] == '@' || (handle[0] == '\u2066' || handle[0] == '\u2069') &&  handle[1] == '@'))
-            {
+            //if (handle.Length > 1 && (handle[0] == '@' || (handle[0] == '\u2066' || handle[0] == '\u2069') &&  handle[1] == '@'))
+            //{
                 //handle the rare case of inlines possessive appostrphe
                 if (handle.Contains("'s"))
                 {
@@ -128,7 +119,7 @@ namespace TweetClip
                 ////twitter's mysterious use of LRI and PDI characters is also handled here - '\u2066', '\u2069'
                 //handle = handle.TrimEnd(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
                 //handle = handle.TrimStart(new char[] { '\u2066', '\u2069', '.', ',', ';', ':', '’', '\'', '\"', '(', ')', '[', ']', '{', '}' });
-            }
+            //}
 
             
             string output = "";

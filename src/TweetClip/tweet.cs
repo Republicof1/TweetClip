@@ -11,10 +11,11 @@ namespace TweetClip
     class Tweet
     {
         private Tweet() { }
-        public Tweet(JToken data, modeFlags mode, Codex codex = null)
+        public Tweet(JToken data, modeFlags mode, List<string> exclusion = null, Codex codex = null)
         {
             _data = (JObject)data;
             _codex = codex;
+            _exclusionList = exclusion;
 
             _nodes = new Dictionary<string, string>();
 
@@ -30,7 +31,6 @@ namespace TweetClip
             {
                 GenerateMap_Clip_Symbolise(data);
             }
-
         }
 
         void GenerateMap_Index(JToken topJToken)
@@ -94,11 +94,11 @@ namespace TweetClip
                                 //handle the case the last char is a elipsis
                                 if (words[i].Last() == '…')
                                 {
-                                    words[i] = "@" + _codex.Proxy(words[i].Substring(0, words[i].Length-2)) + "…";
+                                    words[i] = _codex.Proxy(words[i].Substring(0, words[i].Length-2)) + "…";
                                 }
                                 else
                                 {
-                                    words[i] = "@" + _codex.Proxy(words[i].Substring(0));
+                                    words[i] = _codex.Proxy(words[i].Substring(0));
                                 }
                             }
                         }
@@ -113,15 +113,21 @@ namespace TweetClip
                         jtoken.Replace((JToken)replacement);
                         pathValue = replacement;
                     }
-                    else if (jtoken.Path.Contains(".name"))
+                    else
                     {
-                        //name allows spaces
-                        var replacement = _codex.Proxy(value);
-                        replacement.Replace('_', ' ');
-                        jtoken.Replace((JToken)replacement);
-                        pathValue = replacement;
+                        //spin through the blacklist and replace all content with "EXCLUDED_FROM_EXPORT"
+                        for (int i = 0; i < _exclusionList.Count(); ++i)
+                        {
+                            if(jtoken.Path.Contains(_exclusionList[i]))
+                            {
+                                var replacement = "EXCLUDED_FROM_EXPORT";
+                                jtoken.Replace((JToken)replacement);
+                                pathValue = replacement;
+                                break;
+                            }
+                        }
                     }
-                    int xx = 0;
+
                     _nodes.Add(path, pathValue);
                 }
                 GenerateMap_Clip_Symbolise(jtoken);
@@ -155,5 +161,6 @@ namespace TweetClip
         Dictionary<string, string> _nodes;
         Codex _codex;
         JObject _data;
+        List<string> _exclusionList;
     }
 }

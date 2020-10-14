@@ -10,7 +10,7 @@ Copyright © University of Manchester 2020
 
 Authors Benjamin Green, Lamiece Hassan
 
-Version 2.4.0 "Tanzanite"
+Version 2.5.0 "Obsidian"
 ==============================
 
 ][Description][
@@ -117,7 +117,7 @@ root
    using elasticsearch returns formatted nd-JSON with metadata ready to _bulk import into elasticsearch.
    using prototype returns a text list every serach term found with the present config file and clip mode.
 
-   using symbolReplacement means that all handles and screen names are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~_codexKey.csv) containing each pair of original and replaced symbols.
+   using symbolReplacement means that all twitter handles are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~_codexKey.csv) containing each pair of original and replaced symbols. Now included in this mode (new from 2.5.0 onwards) is functionality to replace certain fields in product output with the code "EXCLUDED_FROM_OUTPUT". This ensures that commonly identifiable data can be explicitly excluded. The file "exclusionFields.excf" is used to define a new line delineated list of fields to suppress. This can be modified but presently contiains a full list of contentious data - user names and descriptions.
    using refreshSymbols means that the system will delete the record of used symbols and will start again. In this case a given replacement symbol is likely to be reused for a new handle but will remain consistent in subsequent runs without this flag.
 
     >>EXAMPLE COMMAND<<
