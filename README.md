@@ -6,10 +6,10 @@
 
 # Description
 
-TweetClip is a commandline tool that takes json and clips it down to the fields you are intersted while maintaining relevant structures.\
-It was built to support work on twitter data, but will work with any json data.\
-It can handle very large data files (200,000+ tweets) on average this will require at least 1gb working memory.\
-It can handle multiple data files per run - must all use the same clipping mode and config file.
+TweetClip is a command line tool that takes JSON data and clips it down to the fields you are interested in while maintaining relevant data structures.\
+It was built to support work on Twitter data, but will work with any JSON data.\
+It can handle very large data files (200,000+ tweets) - on average this will require at least 1GB working memory.\
+It can handle multiple data files per run - these must all use the same clipping mode and config file.
 
 # Content Layout
 ROOT\
@@ -39,7 +39,7 @@ ROOT\
 **-w** | wideMatching         | wide clipping function 										| OPTIONAL 
 **-a** | jsonArrayWrapper     | in clipping mode, output JSON is wrapped within an array 					| OPTIONAL
 **-k** | elasticsearch	  | outputs newline delineated JSON with metadata sufficent to bulk import into the ELK stack   | OPTIONAL
-**-t** | tableOutput          | outputs a CSV instead of json output 							| OPTIONAL
+**-t** | tableOutput          | outputs a CSV instead of JSON output 							| OPTIONAL
 **-p** | prototypeOutput      | outputs a list of the all search results based on the current clip mode			| OPTIONAL
 **-x** | symbolReplacement    | all usernames are replace in the output - symbols are randomly EACH time			| OPTIONAL
 **-r** | refreshSymbols       | clean and restart the history resource if present						| OPTIONAL
@@ -50,14 +50,14 @@ ROOT\
 The purpose of this mode is to describe the structure of the supplied file(s)
 
 ### input files: {*data*}.json *or* {*data*}
-All data must be input as a standard twitter .json collection; 1 line per tweet.\
-Tweetclip will accept {*data*} to indicate either a file or a directory.
-{*data*} can indicate an explicit file e.g. {*data*}.json - where this the case tweet clip will use only the specified file as source data.\
+All data must be inputted as a standard twitter .json collection; 1 line per tweet.\
+TweetClip will accept {*data*} to indicate either a file or a directory.
+{*data*} can indicate an explicit file e.g. {*data*}.json - where this the case TweetClip will use only the specified file as source data.\
 {*data*} can also indicate a folder e.g. {*data*}/ - in this case all files with the .json extension within the specified folder will be used as source data.\
 In each case the program will close after the attempted processing of all target data.
    
 ### output files: catalogue.csv, index.txt
-catalogue.csv - a comprehensive model description of each filed found within the supplied json. This file includes one row for every array index found.\
+catalogue.csv - a comprehensive model description of each field found within the supplied input file. This file includes one row for every array index found.\
 index.txt - a simplified form describing every structurally unique field found, e.g. 'a.b[0]' & 'a.b[1]' will produce a single row, 'a.b'.
 
 ### EXAMPLE COMMAND
@@ -65,21 +65,21 @@ Assuming source data is a single file called example.json that will be run in in
 `tweetclip -d example.json`
 
 ## Clip Mode
-The purpose of clip mode is to reduce tweets to only the fields or patters specified within index.txt, *see below for illustrations*.
+The purpose of clip mode is to reduce tweets to only the fields or patterns specified within index.txt, *see below for illustrations*.
 
-### input files: {*data*}.json, {*cofig*}.txt
-All data must be input as a standard twitter .json collection; 1 line / tweet.\
-{*data*} can indicate an explicit file e.g. {*data*}.json - where this the case tweet clip will use only the specified file as source data.\
+### input files: {*data*}.json, {*config*}.txt
+All data must be input as a standard Twitter .json collection; 1 line / tweet.\
+{*data*} can indicate an explicit file e.g. {*data*}.json - where this the case TweetClip will use only the specified file as source data.\
 {*data*} can also indicate a folder e.g. {*data*}/ - in this case all files with the .json extension within the specified folder will be used as source data.\
 in each case the program will close after the attempted processing of all target data.\
-{*config*}.json this file contains a whitelist of fields or patterns that you wish to be present in your export, 1 symbol per line; Fields can be copied directly from index.txt.
+{*config*}.json this file contains a whitelist of fields or patterns that you wish to be present in your export, 1 symbol per line; fields can be copied directly from index.txt.
 
 ### output files: catalogue.csv, index.txt
-The output filename body can be spcified with -o flag, but a suffix will be added depenedent on output type - to avoid accidental overwrites when using differnet output options. If -o is not supplied, the {data} file name will be used.\
+The output filename body can be specified with -o flag, but a suffix will be added dependent on output type - to avoid accidental overwrites when using different output options. If -o is not supplied, the {data} file name will be used.\
 
-There are three clipping functions **explicit**, **strict** and **wide**. Essentially each function is more or less precise in its interpretation of whehter a give input matches with any given candidate tweet field.
+There are three clipping functions **explicit**, **strict** and **wide**. Essentially each function varies in terms of the precision of its interpretation of whether a given input matches with any given candidate tweet field; explicit being the most precise and wide being the least.
 
-   **Explicit** - This function simply returns fields that exctly match any requested strings in the config file. Arrays will be handled without needing to specifiy necessary indices.
+   **Explicit** - This function simply returns fields that exctly match any requested strings in the config file. Arrays will be handled without needing to specify necessary indices.
    
 >ILLUSTRATIONS
 ```
@@ -112,8 +112,8 @@ input "quoted_status.user.name" ==> […]quoted_status.user.name[…] - e.g. *qu
 **jsonArrayWrapper** (-a) turns {tweet}{tweet}{tweet} into [{tweet},{tweet},{tweet}].\
 **tableOutput** (-t) returns a tabular form of the whitelisted fields in UTF-8 format.\
 **elasticsearch** (-k) returns formatted nd-JSON with metadata ready to \_bulk import into elasticsearch.\
-**prototype** (-p) returns a text list every serach term found with the present config file and clip mode.\
-**symbolReplacement** (-x) means that all twitter handles are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~\_codexKey.csv) containing each pair of original and replaced symbols. Now included in this mode (new from 2.5.0 onwards) is functionality to replace certain fields in product output with the code "EXCLUDED_FROM_OUTPUT". This ensures that commonly identifiable data can be explicitly excluded. The file "exclusionFields.excf" is used to define a new line delineated list of fields to suppress. This can be modified but presently contiains a full list of contentious data - user names and descriptions.\
+**prototype** (-p) returns a text list every search term found with the present config file and clip mode.\
+**symbolReplacement** (-x) means that all Twitter handles are replaced with randomisesd human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~\_codexKey.csv) containing each pair of original and replaced symbols. Now included in this mode (new from 2.5.0 onwards) is functionality to replace certain fields in product output with the code "EXCLUDED_FROM_OUTPUT". This ensures that commonly identifiable data can be explicitly excluded. The file "exclusionFields.excf" is used to define a new line delineated list of fields to suppress. This can be modified but presently contiains a full list of contentious data - user names and descriptions.\
 **refreshSymbols** (-r) using this flag means that the system will delete the record of used symbols and will start again. In this case a given replacement symbol is likely to be reused for a new handle but will remain consistent in subsequent runs without this flag.
 
 ### EXAMPLE COMMAND
@@ -121,10 +121,3 @@ Assuming source data is example.json and run clip mode using config.txt renaming
 `tweetclip -d example.json -c config.txt -o results -w -t -x -r`  
 
 =============================
-
-][TODOs][
-
-Jobs left to do:\
-Evaluate with users
-
-tweetclip
