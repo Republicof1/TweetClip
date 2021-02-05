@@ -12,7 +12,7 @@ namespace TweetClip
 {
     class Program
     {
-        public static string VERSION = "v2.5.0; \"Obsidian\"";
+        public static string VERSION = "v2.5.1; \"Granite\"";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 
@@ -25,7 +25,7 @@ namespace TweetClip
             [Option('c', "configFilePath", Required = false, HelpText = "Relative path to the config file")]
             public string ConfigFilePath { get; set; }
 
-            [Option('o', "outputFilePath", Required = false, HelpText = "if prenset, the name of the output file, note extesions will be ignored")]
+            [Option('o', "outputFilePath", Required = false, HelpText = "if present, the name of the output file, note extesions will be ignored")]
             public string OutputFilePath { get; set; }
 
             [Option('s', "strictMatching", Required = false, HelpText = "strict match mode")]
@@ -110,11 +110,11 @@ namespace TweetClip
                     {
                         if (opts.DataFilePath.Last() == '\\' || opts.DataFilePath.Last() == '/')
                         {
-                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "*.json");
+                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "*.json*");
                         }
                         else
                         {
-                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "\\*.json");
+                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "\\*.json*");
                         }
                     }                   
 

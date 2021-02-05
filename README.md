@@ -1,5 +1,5 @@
 # TweetClip
-### *Version 2.5.0 "Obsidian"*
+### *Version 2.5.1 "Granite"*
 **Authors Benjamin Green, Lamiece Hassan**\
 *Copyright © University of Manchester 2020-2021*
 -----------------------------------
