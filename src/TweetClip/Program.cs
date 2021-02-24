@@ -12,7 +12,8 @@ namespace TweetClip
 {
     class Program
     {
-        public static string VERSION = "v2.5.1; \"Granite\"";
+        //JSON format flexibility - array or JSONL
+        public static string VERSION = "v2.6.0; \"Sapphire\"";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 
@@ -78,7 +79,8 @@ namespace TweetClip
             FIRST = 0,
             IN_PROGRESS,
             LAST,
-            COMPLETE
+            COMPLETE,
+            TOTAL
         }
 
         static void Main(string[] args)
@@ -95,7 +97,7 @@ namespace TweetClip
 
             //get the target file from arguments (Options)
             modeFlags cMode = modeFlags.EXPLICIT;
-            outputFlags oMode = outputFlags.RAW_JSON;
+            outputFlags oMode = outputFlags.JSON_ARRAY;
 
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed<Options>(opts =>

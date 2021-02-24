@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TweetClip": {
+      "commandName": "Project",
+      "commandLineArgs": "tweetclip -d .\\test -c target.txt -s -o test -x"
+    }
+  }
+}

@@ -27,7 +27,6 @@ namespace TweetClip
                     }
                 }
                 _data = dataList.ToArray();
-                int f = 0;
             }
             catch (Exception e)
             {

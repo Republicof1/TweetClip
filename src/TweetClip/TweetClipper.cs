@@ -163,9 +163,15 @@ namespace TweetClip
                     Console.SetCursorPosition(0, Console.CursorTop + 1);
 
                     //preparing files 
-                    if (file.EndOfStream)
+                    if (file.EndOfStream && pStage == processStage.IN_PROGRESS)
                     {
                         pStage = processStage.LAST;
+
+                    }
+
+                    if (file.EndOfStream && pStage == processStage.FIRST)
+                    {
+                        pStage = processStage.TOTAL;
 
                     }
 
@@ -244,7 +250,7 @@ namespace TweetClip
 
             
             //is this is the first run clear out the file
-            if (stage == processStage.FIRST)
+            if (stage == processStage.FIRST || stage == processStage.TOTAL)
             {
                 //clear the file
                 File.WriteAllText(_outputFilename + "_table.csv", "");
@@ -255,6 +261,7 @@ namespace TweetClip
                     tableRow.Add(_whiteList[j]);
                 }
                 tableRow[tableRow.Count - 1] = tableRow.Last().TrimEnd(',');
+
                 table.Add(tableRow.Aggregate((a, b) => a + "," + b));
                 stage = processStage.IN_PROGRESS;
             }
@@ -275,16 +282,10 @@ namespace TweetClip
 
                     if (twKeys.Contains(lookUp))
                     {
-                        //replace internal " with utf left double quotation to avoid misread of truncated text that contains a "
-                        if (lookUp == "full_text")
-                        {
-                            string ft = tw[lookUp].Replace('"', '\u201C');
-                            tableRow.Add("\"" + ft + "\"");
-                        }
-                        else
-                        {
-                            tableRow.Add("\"" + tw[lookUp] + "\"");
-                        }
+                        //replace internal " with utf left double quotation to avoid misread within CSV reader (Excel) of truncated text that contains a "
+                        //this should be made clear in the readme actually
+                        string ft = tw[lookUp].Replace('"', '\u201C');
+                        tableRow.Add("\"" + ft + "\"");
                     }
                     else
                     {
@@ -328,7 +329,7 @@ namespace TweetClip
         private processStage ProcessOutput_Array(processStage stage = processStage.IN_PROGRESS)
         {
             //add the header
-            if (stage == processStage.FIRST)
+            if (stage == processStage.FIRST || stage == processStage.TOTAL)
             {
                 File.WriteAllText(_outputFilename + "_array.json", "");
             }
@@ -353,6 +354,9 @@ namespace TweetClip
                     break;
                 case processStage.LAST:
                     sb.Append(file + "]");
+                    break;
+                case processStage.TOTAL:
+                    sb.Append("[" + file + "]");
                     break;
                 default:
                     Console.WriteLine("Array write state inconsistent - If this issue persists contact developer");
@@ -382,15 +386,18 @@ namespace TweetClip
             file = _clipTwStr.Aggregate((a, b) => a + "\r\n{ \"index\" : { \"_id\" : \"" + ++count + "\" } }\r\n" + b);
 
             //is this is the first run clear out the file
-            if (stage == processStage.FIRST)
+            if (stage == processStage.FIRST || stage == processStage.TOTAL)
             {
                 File.WriteAllText(_outputFilename + "_ELK.json", "");
-                stage = processStage.IN_PROGRESS;
+                if (stage == processStage.FIRST)
+                {
+                    stage = processStage.IN_PROGRESS;
+                }
             }
 
             //add necessary closing newline
             string trailingInfo = "";
-            if (stage == processStage.LAST)
+            if (stage == processStage.LAST || stage == processStage.TOTAL)
             {
                 trailingInfo = "\n";
             }
@@ -420,10 +427,13 @@ namespace TweetClip
             file = _clipTwStr.Aggregate((a, b) => a + "\r\n" + b);
 
             //is this is the first run clear out the file
-            if (stage == processStage.FIRST)
+            if (stage == processStage.FIRST || stage == processStage.TOTAL)
             {
                 File.WriteAllText(_outputFilename + "_raw.json", file);
-                stage = processStage.IN_PROGRESS;
+                if (stage == processStage.FIRST)
+                {
+                    stage = processStage.IN_PROGRESS;
+                }
             }
 
             File.AppendAllText(_outputFilename + "_raw.json", file);
@@ -802,8 +812,6 @@ namespace TweetClip
             Console.WriteLine("Tweetclip - run success");
             Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.White;
-
-            int fff = 0;
         }
 
         MakeBlackList _blackListPtr;
