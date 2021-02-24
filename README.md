@@ -79,7 +79,7 @@ The output filename body can be specified with -o flag, but a suffix will be add
 
 There are three clipping functions **explicit**, **strict** and **wide**. Essentially each function varies in terms of the precision of its interpretation of whether a given input matches with any given candidate tweet field; explicit being the most precise and wide being the least.
 
-   **Explicit** - This function simply returns fields that exctly match any requested strings in the config file. Arrays will be handled without needing to specify necessary indices.
+   **Explicit** - This function simply returns fields that exactly match any requested strings in the config file. Arrays will be handled without needing to specify necessary indices.
    
 >ILLUSTRATIONS
 ```
@@ -89,7 +89,7 @@ input "user.name" ==> user.name
 input "quoted_status.user.name" ==> quoted_status.user.name 
 ```
 
-   **Strict**   - This function will find fields whose entities exactly match the requested string. Where multiple terms are supplied (e.g. user.name) each term is evaluated separatly but order is respected.\
+   **Strict**   - This function will find fields whose entities exactly match the requested string. Where multiple terms are supplied (e.g. user.name) each term is evaluated separately but order is respected.\
 		i.e. searching user.name will match […].user.name.[…] but would not match […].name.user.[…], […].X.user.[…] or […].name.X.[…].
 >ILLUSTRATIONS
 ```
