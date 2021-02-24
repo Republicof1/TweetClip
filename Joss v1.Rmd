@@ -6,6 +6,7 @@ tags:
   - ethics
 authors:
   - name: Benjamin Green^[Custom footnotes for e.g. denoting who the corresponding author is can be included like this.]
+    orcid: 0000-0002-6608-9648
     affiliation: 1
   - name: Lamiece Hassan
     orcid: 0000-0002-5888-422X
