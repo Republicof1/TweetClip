@@ -79,7 +79,7 @@ namespace TweetClip
             FIRST = 0,
             IN_PROGRESS,
             LAST,
-            COMPLETE,
+            FINISHED,
             TOTAL
         }
 

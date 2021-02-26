@@ -42,7 +42,7 @@ namespace TweetClip
                 {
                     if (!file.EndOfStream)
                     {
-                        dataList.Add(file.ReadLine());
+                        dataList.Add(file.ReadLine().Trim(new char[] { '[', ',', ']' }));
                     }
                 }
                 _data = dataList.ToArray();

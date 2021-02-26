@@ -189,7 +189,7 @@ namespace TweetClip
                     _clippedTweets.Clear();
                     _clipTwStr.Clear();
 
-                } while (!file.EndOfStream && pStage != processStage.COMPLETE);
+                } while (!file.EndOfStream && pStage != processStage.FINISHED);
 
                 Console.CursorTop = Console.CursorTop + 1;
                 Console.CursorLeft = 0;
@@ -231,7 +231,7 @@ namespace TweetClip
 
             File.WriteAllLines(_outputFilename + "_prototype.txt", outWhiteList);
 
-            return processStage.COMPLETE;
+            return processStage.FINISHED;
         }
 
         //using the tweet object version of the data
