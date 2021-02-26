@@ -1,5 +1,5 @@
 # TweetClip
-### *Version 2.6.0 "Sapphire"*
+### *Version 2.6.2 "Yellow Sapphire"*
 **Authors Benjamin Green, Lamiece Hassan**\
 *Copyright © University of Manchester 2020-2021*
 -----------------------------------
@@ -7,7 +7,7 @@
 # Description
 
 TweetClip is a command line tool that takes JSON data and clips it down to the fields you are interested in while maintaining relevant data structures.\
-It was built to support work on Twitter data, but will work with any JSON data.\
+It was built to support work on Twitter data, but will work with data in a JSONL, JSON single line array or JSON multiline array data.\
 It can handle very large data files (200,000+ tweets) - on average this will require at least 1GB working memory.\
 It can handle multiple data files per run - these must all use the same clipping mode and config file.
 

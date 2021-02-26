@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,13 +41,43 @@ namespace TweetClip
             List<string> dataList = new List<string>();
 
             for (int i = 0; i < blocksize; ++i)
+            {
+                if (!file.EndOfStream)
                 {
-                    if (!file.EndOfStream)
+                    //get the first line of the file
+                    string line = file.ReadLine();
+                    
+                    //if the file contains only one line it's *probably* an array
+                    if (file.EndOfStream && i == 0)
                     {
-                        dataList.Add(file.ReadLine().Trim(new char[] { '[', ',', ']' }));
+                        Object obj = JsonConvert.DeserializeObject(line);
+                        //test if this is actually an array
+                        if(obj.GetType() == typeof(JArray))
+                        {
+                            List<JToken> arrayContent = new List<JToken>(((JArray)obj).Children());
+                            foreach(JToken contObj in arrayContent)
+                            {
+                                dataList.Add(JsonConvert.SerializeObject(contObj));
+                            }
+                        }
+
+                        //this is for the incredibly rare case of someone clipping a single tweet...
+                        else if (obj.GetType() == typeof(JObject))
+                        {
+                            dataList.Add(JsonConvert.SerializeObject(obj));
+                        }
+
+                        break;
+                    }
+                    //if this is not a one line array, but is either JSONL or multiline JSON array
+                    else
+                    {
+                        //no point deserialising and serialising, just trim each line
+                        dataList.Add(line.Trim(new char[] { '[', ',', ']' }));
                     }
                 }
-                _data = dataList.ToArray();
+            }
+            _data = dataList.ToArray();
         }
 
         public string[] Data
