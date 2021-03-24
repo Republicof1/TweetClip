@@ -13,7 +13,7 @@ namespace TweetClip
     class Program
     {
         //JSON format flexibility - array or JSONL
-        public static string VERSION = "v2.6.2; \"Yellow Sapphire\"";
+        public static string VERSION = "v2.6.3; \"Blue Sapphire\"";
         //global folder address
         public static string OUTPUT_FOLDER = "Data\\";
 

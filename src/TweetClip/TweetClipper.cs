@@ -155,7 +155,10 @@ namespace TweetClip
                     {
                         Console.CursorLeft = 0;
                         Console.Write("Discovering tweet \"" + ++_processCount + "\"");
-
+                        if (_rawTweets.Data[i] == "")
+                        { 
+                            continue; 
+                        }
                         _tweetObjects.Add(JObject.Parse(_rawTweets.Data[i]));
                         _tweets.Add(new Tweet(_tweetObjects.Last(), mode, _anonymousExclusionList, _codex));
                         _tweets.Last().Index(ref _contents, ref _types);
