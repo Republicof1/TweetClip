@@ -750,7 +750,10 @@ namespace TweetClip
                     {
                         Console.CursorLeft = 0;
                         Console.Write("Exploring tweet \"" + ++count + "\"");
-
+                        if (tw == "")
+                        {
+                            continue;
+                        }
                         JObject tweetObject = JObject.Parse(tw);
                         _tweets.Add(new Tweet(tweetObject, mode));
                         _tweets.Last<Tweet>().Index(ref _contents, ref _types);
