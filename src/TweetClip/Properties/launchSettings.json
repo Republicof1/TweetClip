@@ -2,7 +2,7 @@
   "profiles": {
     "TweetClip": {
       "commandName": "Project",
-      "commandLineArgs": "tweetclip -d .\\latest\\data_test.json"
+      "commandLineArgs": "tweetclip -d .\\latest\\data_test.json -x -c .\\latest\\index.txt"
     }
   }
 }

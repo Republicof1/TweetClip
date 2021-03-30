@@ -84,7 +84,7 @@ namespace TweetClip
                     string path = jtoken.Path;
                     string value = string.Join(",\n", jtoken.Parent.Values());
 
-                    if (jtoken.Path.Contains("full_text"))
+                    if (jtoken.Path.Contains("full_text") || jtoken.Path.Contains("text"))
                     {
                         string[] words = pathValue.Split(new char[]{ ' ', '\n'});
                         for(int i = 0; i < words.Length; ++i)

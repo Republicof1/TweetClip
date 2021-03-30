@@ -1,4 +1,4 @@
-=COLOURS
+#NAME?
 Aero
 Alabaster
 Almond
@@ -30,7 +30,6 @@ Beaver
 Beige
 B'dazzled
 Bisque
-Bistre
 Bistre
 Bitter
 Bittersweet
@@ -90,7 +89,7 @@ CG
 Champagne
 Charcoal
 Charleston
-Charm pink
+Charm
 Chartreuse
 Cherry
 Chestnut
@@ -110,7 +109,6 @@ Coffee
 Columbia
 Congo
 Cool
-Copper
 Copper
 Coquelicot
 Coral
@@ -180,7 +178,6 @@ Ghost
 Glaucous
 Glossy
 GO
-Gold
 Gold
 Golden
 Goldenrod
@@ -267,7 +264,6 @@ Mantis
 Mardi
 Marigold
 Maroon
-Mauve
 Mauve
 Mauvelous
 Maximum
@@ -454,7 +450,6 @@ Tangerine
 Tango
 Tart
 Taupe
-Taupe
 Tea
 Teal
 Telemagenta
@@ -500,7 +495,7 @@ Violet
 Viridian
 Vivid
 Volt
-Warm 
+Warm
 Wheat
 White
 Wild
@@ -517,7 +512,7 @@ Yellow
 Zaffre
 Zomp
 !COLOURS
-=ANIMALS
+#NAME?
 Aardvark
 Ant
 Anteater
@@ -602,8 +597,6 @@ Raccoon
 Rat
 Rhinoceros
 Seal
-Seal
-Seal
 SeaLion
 Sheep
 Sifaka
@@ -619,7 +612,6 @@ Wallaby
 Walrus
 Warthog
 Whale
-Whale
 Wildcat
 Wildebeest
 Wolf
@@ -627,7 +619,7 @@ Wolverine
 Wombat
 Zebra
 !ANIMALS
-=STARS
+#NAME?
 Absolutno
 Achernar
 Achird
@@ -1094,7 +1086,7 @@ Zubenelgenubi
 Zubenelhakrabi
 Zubeneschamali
 !STARS
-=STONES
+#NAME?
 Actinolite
 Adamite
 Aegerine
