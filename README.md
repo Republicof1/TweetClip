@@ -1,5 +1,5 @@
 # TweetClip
-### *Version 2.6.5 "Green Sapphire"*
+### *Version 2.6.6 "Orange Sapphire"*
 **Authors Benjamin Green, Lamiece Hassan**\
 *Copyright © University of Manchester 2020-2021*
 -----------------------------------

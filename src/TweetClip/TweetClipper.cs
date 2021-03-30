@@ -170,7 +170,7 @@ namespace TweetClip
                     {
                         pStage = processStage.LAST;
 
-                    }
+                    } 
 
                     if (file.EndOfStream && pStage == processStage.FIRST)
                     {
