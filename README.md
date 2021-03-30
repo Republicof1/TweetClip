@@ -1,5 +1,5 @@
 # TweetClip
-### *Version 2.6.2 "Yellow Sapphire"*
+### *Version 2.6.5 "Green Sapphire"*
 **Authors Benjamin Green, Lamiece Hassan**\
 *Copyright © University of Manchester 2020-2021*
 -----------------------------------
@@ -113,7 +113,7 @@ input "quoted_status.user.name" ==> […]quoted_status.user.name[…] - e.g. *qu
 **tableOutput** (-t) returns a tabular form of the whitelisted fields in UTF-8 format. Note: all speechmarks (") are replaced with u201C unicode characters in order for common table readers to manage comma separation appropriately. \
 **elasticsearch** (-k) returns formatted nd-JSON with metadata ready to \_bulk import into elasticsearch.\
 **prototype** (-p) returns a text list every search term found with the present config file and clip mode.\
-**symbolReplacement** (-x) means that all Twitter handles are replaced with randomised human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~\_codexKey.csv) containing each pair of original and replaced symbols. Now included in this mode (new from 2.5.0 onwards) is functionality to replace certain fields in product output with the code "EXCLUDED_FROM_OUTPUT". This ensures that commonly identifiable data can be explicitly excluded. The file "exclusionFields.excf" is used to define a new line delineated list of fields to suppress. This can be modified but presently contains a full list of contentious data - user names and descriptions.\
+**symbolReplacement** (-x) means that all Twitter handles (found in .screen_name, full_text and text fields) are replaced with randomised human readable terms whereever they appear including within text. Note: this process maintains a history between runs to ensure consistent application of pseudonyms. This will also produce a table (~\_codexKey.csv) containing each pair of original and replaced symbols. Now included in this mode (new from 2.5.0 onwards) is functionality to replace certain fields in product output with the code "EXCLUDED_FROM_OUTPUT". This ensures that commonly identifiable data can be explicitly excluded. The file "exclusionFields.excf" is used to define a new line delineated list of fields to suppress. This can be modified but presently contains a full list of contentious data - user names and descriptions.\
 **refreshSymbols** (-r) using this flag means that the system will delete the record of used symbols and will start again. In this case a given replacement symbol is likely to be reused for a new handle but will remain consistent in subsequent runs without this flag.
 
 ### EXAMPLE COMMAND
