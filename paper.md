@@ -12,10 +12,9 @@ authors:
     orcid: 0000-0002-5888-422X
     affiliation: 1
 affiliations:
- - name: Division of Informatics,Imaging and Data Sciences, School of Health Sciences, University of Manchester
+ - name: Division of Informatics, Imaging and Data Sciences, School of Health Sciences, University of Manchester
    index: 1
 date: 08 June 2021
-bibliography: paper.bib
 
 # Summary
 Twitter is one of the most popular social media platforms globally, averaging 330 million active users every month (Statista, 2021). Part of Twitter's broad appeal is that users can follow anyone with a public profile, including politicians, celebrities and organisations. 
@@ -25,7 +24,7 @@ Increasingly, Twitter is being used by academics for research purposes to reveal
 TweetClip addresses this issue by simplifying the process of extracting a user-defined range of Twitter data fields necessary to complete a given research project. It accepts tweets returned from the Twitter API as JSON objects and prunes datasets down to the data fields of interest in reusable formats, without the need for advanced programming knowledge. 
 
 
-# Statement of need
+# Statement of Need
 Several useful tools exist to simplify the process of collecting Twitter data, including packages for R and Python (e.g.tweepy, rtweet). Typically these tools allow users to collect new datasets of tweets using user-defined search queries and/or to 'rehydrate' pre-existing datasets using lists of unique numeric tweet identifiers to retrieve the complete tweets. 
 
 Whilst such tools lower the bar to entry for scholars wishing to conduct research using Twitter data, several hurdles arguably remain for programming novices before they can proceed to analysis. First, researchers are often (though not always) required to have a working knowledge of particular software packages and programming languages. Second, tweet retrieval strategies typically require researchers to choose between retrieving more complete data in rich but complex 'nested' structures (e.g. .JSON) or are restricted to a smaller number of developer defined data fields in more familiar file formats (e.g. .csv). Third, data manipulation is also complicated by the fact that - in longitudinal studies especially - Twitter data is often spread across multiple files, due to size and/or data collection methods. Collectively, these issues conspire to impede the ability to access and process data efficiently, keeping only the required fields and reducing processing of identifiable data.
@@ -37,22 +36,8 @@ TweetClip's indexing feature allows users to create a comprehensive catalogue of
 TweetClip can handle very large data files (200,000+ tweets) and multiple data files simultaneously. Output files of tweets can be exported as a single file in JSON or .csv format, compatible with most standard programming and statistical software packages. It was built to support work on Twitter data, particularly by novices with limited programming knowledge, but it will work with any JSON data.
 
 
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-
 # Acknowledgements
 
 This work was supported by a grant to LH from the Medical Research Council (Ref: MR/S004025/1). We also acknowledge contributions from xxx during the development of this project.
 
-# References
+
