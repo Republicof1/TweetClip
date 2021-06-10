@@ -5,7 +5,7 @@ tags:
   - JSON
   - ethics
 authors:
-  - name: Benjamin Green
+  - name: Benjamin Green^[corresponding author]
     orcid: 0000-0002-6608-9648
     affiliation: 1
   - name: Lamiece Hassan
@@ -14,7 +14,7 @@ authors:
 affiliations:
  - name: Centre for Health Informatics, Division of Informatics, Imaging and Data Sciences, School of Health Sciences, University of Manchester
    index: 1
-date: 08 June 2021
+date: 10 June 2021
 
 # Summary
 Twitter is one of the most popular social media platforms globally, averaging over 300 million monthly active users (Statista, 2021). Part of Twitter's broad appeal is that users can follow anyone with a public profile, including politicians, celebrities and organisations. 
@@ -31,7 +31,7 @@ Whilst such tools lower the bar to entry for scholars wishing to conduct researc
 
 TweetClip is a command line tool that aims to fill this gap, complementing popular tools used for collecting and analysing Twitter data (e.g. hydrator). It accepts data obtained from the Twitter API as JSON objects and prunes datasets down to the most relevant fields of interest while maintaining relevant data structures. The expected benefit is the ability to easily create smaller, more relevant datasets to streamline research without a requirement to have any experience of programming or scripting.
 
-TweetClip's indexing feature allows users to create a comprehensive catalogue of all available data fields, including nested JSON objects. Clipping mode can then be used to select fields of interest, using either explicitly named fields to retrieve exact matches, or in an exploratory manner to obtain all fields containing particular strings. The symbol replacement option replaces identifiable Twitter usernames (e.g. \@JOSS_user) with arbitrary pseudonyms (\@bluewhale), whilst maintaining a history between runs to ensure consistent application and suppressing the most common fields including person/ally/ identifiable data (including numeric user identifiers).
+TweetClip's indexing feature allows users to create a comprehensive catalogue of all available data fields, including nested JSON objects. Clipping mode can then be used to select fields of interest, using either explicitly named fields to retrieve exact matches, or in an exploratory manner to obtain all fields containing particular strings. The symbol replacement option replaces identifiable Twitter usernames (e.g. \@JOSS_user) with arbitrary pseudonyms (\@bluewhale), whilst maintaining a history between runs to ensure consistent application and suppressing the most common fields including personally identifiable data (including numeric user identifiers).
 
 TweetClip can handle very large data files (200,000+ tweets) and multiple data files simultaneously. Output files of tweets can be exported as a single file in JSON or .csv format, compatible with most standard programming and statistical software packages. It was built to support work on Twitter data, particularly by novices with limited programming knowledge, but it will work with any JSON data.
 
