@@ -5,7 +5,7 @@ tags:
   - JSON
   - ethics
 authors:
-  - name: Benjamin Green^[Custom footnotes for e.g. denoting who the corresponding author is can be included like this.]
+  - name: Benjamin Green
     orcid: 0000-0002-6608-9648
     affiliation: 1
   - name: Lamiece Hassan
@@ -17,7 +17,7 @@ affiliations:
 date: 08 June 2021
 
 # Summary
-Twitter is one of the most popular social media platforms globally, averaging 330 million active users every month (Statista, 2021). Part of Twitter's broad appeal is that users can follow anyone with a public profile, including politicians, celebrities and organisations. 
+Twitter is one of the most popular social media platforms globally, averaging over 300 million monthly active users (Statista, 2021). Part of Twitter's broad appeal is that users can follow anyone with a public profile, including politicians, celebrities and organisations. 
 
 Increasingly, Twitter is being used by academics for research purposes to reveal insights into attitudes, behaviours and social networks. Twitter offers approved academics access to 'tweets' and associated metadata derived from public profiles for research purposes via an Application Programming Interface (API). However, for a number of reasons extracting and manipulating this data into suitable formats for analysis can be challenging, especially for those without programming skills. 
 
@@ -42,3 +42,4 @@ This work was supported by a grant to LH from the Medical Research Council (Ref:
 
 
 # References 
+Statistica (2021). Twitter - Statistics & Facts. https://www.statista.com/  Accessed 10 June 2021
