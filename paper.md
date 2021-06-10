@@ -12,7 +12,7 @@ authors:
     orcid: 0000-0002-5888-422X
     affiliation: 1
 affiliations:
- - name: Division of Informatics, Imaging and Data Sciences, School of Health Sciences, University of Manchester
+ - name: Centre for Health Informatics, Division of Informatics, Imaging and Data Sciences, School of Health Sciences, University of Manchester
    index: 1
 date: 08 June 2021
 
@@ -29,7 +29,7 @@ Several useful tools exist to simplify the process of collecting Twitter data, i
 
 Whilst such tools lower the bar to entry for scholars wishing to conduct research using Twitter data, several hurdles arguably remain for programming novices before they can proceed to analysis. First, researchers are often (though not always) required to have a working knowledge of particular software packages and programming languages. Second, tweet retrieval strategies typically require researchers to choose between retrieving more complete data in rich but complex 'nested' structures (e.g. .JSON) or are restricted to a smaller number of developer defined data fields in more familiar file formats (e.g. .csv). Third, data manipulation is also complicated by the fact that - in longitudinal studies especially - Twitter data is often spread across multiple files, due to size and/or data collection methods. Collectively, these issues conspire to impede the ability to access and process data efficiently, keeping only the required fields and reducing processing of identifiable data.
 
-TweetClip is a command line tool that aims to fill this gap, complementing popular tools used for collecting and analysing Twitter data (e.g. hydrator). It accepts data obtained from the Twitter API as JSON objects and prunes datasets down to the most relevant fields of interest while maintaining relevant data structures. The expected benefit is the ability to easily create smaller, more relevant datasets to streamline research ??without a requirement to have any experience of programming or scripting??.
+TweetClip is a command line tool that aims to fill this gap, complementing popular tools used for collecting and analysing Twitter data (e.g. hydrator). It accepts data obtained from the Twitter API as JSON objects and prunes datasets down to the most relevant fields of interest while maintaining relevant data structures. The expected benefit is the ability to easily create smaller, more relevant datasets to streamline research without a requirement to have any experience of programming or scripting.
 
 TweetClip's indexing feature allows users to create a comprehensive catalogue of all available data fields, including nested JSON objects. Clipping mode can then be used to select fields of interest, using either explicitly named fields to retrieve exact matches, or in an exploratory manner to obtain all fields containing particular strings. The symbol replacement option replaces identifiable Twitter usernames (e.g. @JOSS_user) with arbitrary pseudonyms (@bluewhale), whilst maintaining a history between runs to ensure consistent application and suppressing the most common fields including person/ally/ identifiable data (including numeric user identifiers).
 
@@ -37,8 +37,7 @@ TweetClip can handle very large data files (200,000+ tweets) and multiple data f
 
 
 # Acknowledgements
-
-This work was supported by a grant to LH from the Medical Research Council (Ref: MR/S004025/1). We also acknowledge contributions from xxx during the development of this project.
+This work was supported by a grant to LH from the Medical Research Council (Ref: MR/S004025/1). 
 
 
 # References 
