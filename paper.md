@@ -33,7 +33,7 @@ TweetClip is a command line tool that aims to fill this gap, complementing popul
 
 TweetClip's indexing feature allows users to create a comprehensive catalogue of all available data fields, including nested JSON objects. Clipping mode can then be used to select fields of interest, using either explicitly named fields to retrieve exact matches, or in an exploratory manner to obtain all fields containing particular strings. The symbol replacement option replaces identifiable Twitter usernames (e.g. \@JOSS_user) with arbitrary pseudonyms (\@bluewhale), whilst maintaining a history between runs to ensure consistent application and suppressing the most common fields including personally identifiable data (including numeric user identifiers).
 
-TweetClip can handle very large data files (200,000+ tweets) and multiple data files simultaneously. Output files of tweets can be exported as a single file in JSON or .csv format, compatible with most standard programming and statistical software packages. It was built to support work on Twitter data, particularly by novices with limited programming knowledge, but it will work with any JSON data.
+TweetClip can handle very large data files (200,000+ tweets) and multiple data files simultaneously. Output files of tweets can be exported as a single file in JSON or .csv format, compatible with most standard programming and statistical software packages. It was built to support work on Twitter data, particularly by novices with limited programming knowledge, but it will work with any JSON data. Thus, TweetClip could be used as a practical tool to support data governance and respond to some of the ethical issues arising from working with social media data [@Fordea].
 
 
 # Acknowledgements
