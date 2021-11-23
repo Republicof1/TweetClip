@@ -13,9 +13,15 @@ namespace TweetClip
     class Program
     {
         //JSON format flexibility - array or JSONL
-        public static string VERSION = "v2.6.6; \"Orange Sapphire\"";
+        public static string VERSION = "v2.6.7; \"Black Sapphire\"";
+
+        //globale delimiter - set properly in main
+        public static char DELIMITER = Path.DirectorySeparatorChar;
+
         //global folder address
-        public static string OUTPUT_FOLDER = "Data\\";
+        public static string OUTPUT_FOLDER = "Data" + DELIMITER;
+        
+
 
         //args definitions
         public class Options
@@ -95,6 +101,17 @@ namespace TweetClip
             bool symbolise = false;
             bool datafileAsOutput = false;
 
+
+            DELIMITER = Path.DirectorySeparatorChar;
+
+            PlatformID platID = Environment.OSVersion.Platform;
+            if (platID == PlatformID.Other)
+            {
+                Console.WriteLine("CRITICAL FAILURE: Platform not recognised! - this program must run under Windows or Unix environments");
+                Console.WriteLine("program exiting");
+                return;
+            }
+
             //get the target file from arguments (Options)
             modeFlags cMode = modeFlags.EXPLICIT;
             outputFlags oMode = outputFlags.JSON_ARRAY;
@@ -103,25 +120,41 @@ namespace TweetClip
                 .WithParsed<Options>(opts =>
                 {
                     string directory = Directory.GetCurrentDirectory();
+                    char antilimiter = '/';
+                    if (DELIMITER == antilimiter)
+                    {
+                        antilimiter = '\\';
+                    }
+                    
+                    if (opts.DataFilePath.Contains(antilimiter))
+                    {
+                        opts.DataFilePath = opts.DataFilePath.Replace(antilimiter, DELIMITER);
+                    }
 
                     if (opts.DataFilePath.Contains("json"))
                     {
+
                         dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath);
                     }
                     else
                     {
-                        if (opts.DataFilePath.Last() == '\\' || opts.DataFilePath.Last() == '/')
+                        if (opts.DataFilePath.Last() == DELIMITER)
                         {
                             dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "*.json*");
                         }
                         else
                         {
-                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + "\\*.json*");
+                            dataFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.DataFilePath + DELIMITER + "*.json*");
                         }
                     }                   
 
                     if (opts.ConfigFilePath != null)
                     {
+                        if (opts.ConfigFilePath.Contains(antilimiter))
+                        {
+                            opts.ConfigFilePath = opts.ConfigFilePath.Replace(antilimiter, DELIMITER);
+                        }
+
                         configFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), OUTPUT_FOLDER + opts.ConfigFilePath);
                     }
                     if(opts.OutputFilePath != null)

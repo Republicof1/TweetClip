@@ -131,6 +131,7 @@ namespace TweetClip
                 }
                 catch (Exception e)
                 {
+                    string errorVal = e.Message;
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Can't read the text in this file");
                     Console.ForegroundColor = ConsoleColor.White;
@@ -725,6 +726,7 @@ namespace TweetClip
                 }
                 catch (Exception e)
                 {
+                    string errorVal = e.Message;
                     Console.BackgroundColor = ConsoleColor.Red;
                     Console.ForegroundColor = ConsoleColor.Black;
                     Console.WriteLine("Tweetclip - run failed");

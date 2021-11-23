@@ -32,6 +32,7 @@ namespace TweetClip
             }
             catch (Exception e)
             {
+                string errorVal = e.Message;
                 Console.WriteLine("Can't read the text in this file");
             }
         }
