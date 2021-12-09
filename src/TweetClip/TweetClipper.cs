@@ -99,11 +99,21 @@ namespace TweetClip
                     break;
             }
 
+            string spacing = "";
+            if (PLATFORM == PlatformID.Win32NT)
+            {
+                spacing = "\n\n";
+            }
+            else
+            {
+                spacing = " | ";
+            }
+
             //if codex is required boot up the list
             if (codexFiles != null)
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine("Building proxy symbols from codex");
+                Console.Write("Building proxy symbols from codex");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 _codex = new Codex(File.ReadAllLines(codexFiles[0]));
@@ -112,7 +122,7 @@ namespace TweetClip
             if (exclusionList != null)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("Loading exclusion list");
+                Console.Write(spacing + "Loading exclusion list");
                 Console.ForegroundColor = ConsoleColor.White;
 
                 _anonymousExclusionList = File.ReadAllLines(exclusionList[0]).ToList();
@@ -126,14 +136,14 @@ namespace TweetClip
             {
                 try
                 {
-                    Console.WriteLine("\nClipping " + dataFiles[fileIndex]);
+                    Console.WriteLine(spacing + "Clipping " + dataFiles[fileIndex]);
                     file = File.OpenText(dataFiles[fileIndex]);
                 }
                 catch (Exception e)
                 {
                     string errorVal = e.Message;
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Can't read the text in this file");
+                    Console.WriteLine(spacing + "Can't read the text in this file");
                     Console.ForegroundColor = ConsoleColor.White;
                 }
 
@@ -270,7 +280,10 @@ namespace TweetClip
                 stage = processStage.IN_PROGRESS;
             }
 
-            Console.SetCursorPosition(0, Console.CursorTop + 1);
+            //Console.SetCursorPosition(0, Console.CursorTop + 1);
+            //Console.CursorTop += 1;
+            Console.CursorLeft = 0;
+            Console.Write("\n");
             for (int i = 0; i < _tweets.Count; ++i)
             {
                 tableRow = new List<string>();
@@ -304,8 +317,9 @@ namespace TweetClip
             Encoding utf8WithBom = new UTF8Encoding(true);
             File.AppendAllLines(_outputFilename + "_table.csv", table, utf8WithBom);
 
+            Console.BackgroundColor = ConsoleColor.Black;
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("sweep written to table");
+            Console.WriteLine("\nsweep written to table");
             Console.ForegroundColor = ConsoleColor.White;
 
             return stage;
@@ -371,7 +385,7 @@ namespace TweetClip
             File.AppendAllText(_outputFilename + "_array.json", sb.ToString());
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("sweep written to file as **JSON ARRAY**");
+            Console.WriteLine("\nsweep written to file as **JSON ARRAY**");
             Console.ForegroundColor = ConsoleColor.White;
 
             return stage;
@@ -413,7 +427,7 @@ namespace TweetClip
             sb.Clear();
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("sweep written to file as **ELK COMPATIBLE JSON**");
+            Console.WriteLine("\nsweep written to file as **ELK COMPATIBLE JSON**");
             Console.ForegroundColor = ConsoleColor.White;
 
             return stage;
@@ -443,7 +457,7 @@ namespace TweetClip
             File.AppendAllText(_outputFilename + "_raw.json", file);
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("sweep written to file as **RAW JSON**");
+            Console.WriteLine("\nsweep written to file as **RAW JSON**");
             Console.ForegroundColor = ConsoleColor.White;
 
             return stage;

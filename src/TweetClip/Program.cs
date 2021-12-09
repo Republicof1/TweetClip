@@ -20,8 +20,13 @@ namespace TweetClip
 
         //global folder address
         public static string OUTPUT_FOLDER = "Data" + DELIMITER;
-        
 
+        //global to allow us to return to the original console colours
+        public static ConsoleColor INIT_FRGD_COLOUR = Console.ForegroundColor;
+        public static ConsoleColor INIT_BKGD_COLOUR = Console.BackgroundColor;
+
+        //platform id
+        public static PlatformID PLATFORM = Environment.OSVersion.Platform;
 
         //args definitions
         public class Options
@@ -101,7 +106,6 @@ namespace TweetClip
             bool symbolise = false;
             bool datafileAsOutput = false;
 
-
             DELIMITER = Path.DirectorySeparatorChar;
 
             PlatformID platID = Environment.OSVersion.Platform;
@@ -109,6 +113,8 @@ namespace TweetClip
             {
                 Console.WriteLine("CRITICAL FAILURE: Platform not recognised! - this program must run under Windows or Unix environments");
                 Console.WriteLine("program exiting");
+                Console.BackgroundColor = INIT_BKGD_COLOUR;
+                Console.ForegroundColor = INIT_FRGD_COLOUR;
                 return;
             }
 
@@ -225,6 +231,7 @@ namespace TweetClip
             {
                 Console.ForegroundColor = ConsoleColor.Magenta;
                 Console.WriteLine("using datafile name as output name");
+                Console.BackgroundColor = ConsoleColor.Black;
                 Console.ForegroundColor = ConsoleColor.White;
             }
 
@@ -243,8 +250,8 @@ namespace TweetClip
                        Console.ForegroundColor = ConsoleColor.Red;
                        Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found!");
                        Console.WriteLine("Please check filepath is correct before running again");
-                       Console.BackgroundColor = ConsoleColor.Black;
-                       Console.ForegroundColor = ConsoleColor.White;
+                       Console.BackgroundColor = INIT_BKGD_COLOUR;
+                       Console.ForegroundColor = INIT_FRGD_COLOUR;
                    });
                    return;
                 }
@@ -260,8 +267,8 @@ namespace TweetClip
                 Console.BackgroundColor = ConsoleColor.Cyan;
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.WriteLine("Tweetclip - index run success!");
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = INIT_BKGD_COLOUR;
+                Console.ForegroundColor = INIT_FRGD_COLOUR;
             }
             //clip mode
             else if (dataFiles != null && configFiles != null)
@@ -286,8 +293,8 @@ namespace TweetClip
                            Console.WriteLine("file \"" + opts.DataFilePath + "\" could not be found!");
                        }
                        Console.WriteLine("Please check filepath(s) before running again");
-                       Console.BackgroundColor = ConsoleColor.Black;
-                       Console.ForegroundColor = ConsoleColor.White;
+                       Console.BackgroundColor = INIT_BKGD_COLOUR;
+                       Console.ForegroundColor = INIT_FRGD_COLOUR;
                    });
                    return;
                 }
@@ -302,8 +309,8 @@ namespace TweetClip
                 Console.BackgroundColor = ConsoleColor.Green;
                 Console.ForegroundColor = ConsoleColor.Black;
                 Console.WriteLine("Tweetclip - clipping run success!");
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = INIT_BKGD_COLOUR;
+                Console.ForegroundColor = INIT_BKGD_COLOUR;
             }
         }
     }
